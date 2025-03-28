@@ -6,10 +6,10 @@ import java.util.Scanner;
 
 import javax.imageio.ImageIO;
 
-import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferInt;
 
+import com.fachriza.imagequadtree.image.ImageData;
+import com.fachriza.imagequadtree.utils.ImageUtil;
 import com.fachriza.imagequadtree.utils.SafeScanner;
 
 public class ImageCompressor {
@@ -18,27 +18,10 @@ public class ImageCompressor {
     private int minimumBlockSize;
     private float compressionLevel;
 
-    private int[] buffer;
-    private int width;
-    private int height;
+    private ImageData imageData;
 
     public ImageCompressor(File inputFile) throws IOException {
-        BufferedImage img = ImageIO.read(inputFile);
-
-        this.width = img.getWidth();
-        this.height = img.getHeight();
-
-        // int[] pixels = new int[width * height];
-        // img.getRGB(0, 0, width, height, pixels, 0, width); // Convert to array
-        BufferedImage image = new BufferedImage(width, height,
-                BufferedImage.TYPE_INT_RGB);
-
-        Graphics2D g = image.createGraphics();
-        g.drawImage(img, 0, 0, null);
-        g.dispose();
-
-        DataBufferInt dataBuffer = (DataBufferInt) image.getRaster().getDataBuffer();
-        this.buffer = dataBuffer.getData();
+        imageData = new ImageData(ImageIO.read(inputFile));
     }
 
     public ImageCompressor setMethod(int method) {
@@ -61,7 +44,19 @@ public class ImageCompressor {
         return this;
     }
 
-    public void compress(File outputFile, File outputGif) {
+    public void compress(File outputFile, File outputGif) throws IOException {
+        // test
+        byte[] avg = ImageUtil.getAverageColor(imageData, 0, 0, imageData.getWidth(), imageData.getHeight());
+
+        BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+        int[] packed = { 0 };
+
+        packed[0] = (0b11111111 << 24) | ((avg[0] & 0xff) << 16) | ((avg[1] & 0xff) << 8) | (avg[2] & 0xff);
+
+        image.setRGB(0, 0, 1, 1, packed, 0, 1);
+
+        ImageIO.write(image, "png", outputFile);
+
         return;
     }
 
@@ -93,18 +88,28 @@ public class ImageCompressor {
 
         String outputFileAbsolutePath = null;
         File outputFile = null;
-        while (outputFile == null || !outputFile.getParentFile().isDirectory()) {
+        while (outputFile == null || outputFile.getParentFile() == null || !outputFile.getParentFile().isDirectory()) {
             outputFileAbsolutePath = safeScanner.getInput("Enter output file path", String.class);
             outputFile = new File(outputFileAbsolutePath);
+        }
+        if (outputFile.isFile()) {
+            System.out.println("File already exists. Will overwrite later");
         }
 
         String outputGifAbsolutePath = null;
         File outputGif = null;
-        while (outputGif == null || !outputGif.getParentFile().isDirectory()) {
+        while (outputGif == null || outputGif.getParentFile() == null || !outputGif.getParentFile().isDirectory()) {
             outputGifAbsolutePath = safeScanner.getInput("Enter output GIF path", String.class);
             outputGif = new File(outputGifAbsolutePath);
         }
+        if (outputGif.isFile()) {
+            System.out.println("File already exists. Will overwrite later");
+        }
 
-        imageCompressor.compress(outputFile, outputGif);
+        try {
+            imageCompressor.compress(outputFile, outputGif);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
