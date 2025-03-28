@@ -9,14 +9,19 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 
 import com.fachriza.imagequadtree.image.ImageData;
+import com.fachriza.imagequadtree.image.errormeasuremethod.ErrorMeasurementMethod;
+import com.fachriza.imagequadtree.image.errormeasuremethod.VarianceError;
+import com.fachriza.imagequadtree.quadtree.ImageQuadTree;
+import com.fachriza.imagequadtree.quadtree.ImageQuadTreeBuilder;
 import com.fachriza.imagequadtree.utils.ImageUtil;
 import com.fachriza.imagequadtree.utils.SafeScanner;
 
 public class ImageCompressor {
-    private int method;
     private float threshold;
     private int minimumBlockSize;
     private float compressionLevel;
+
+    private ErrorMeasurementMethod emm;
 
     private ImageData imageData;
 
@@ -25,12 +30,16 @@ public class ImageCompressor {
     }
 
     public ImageCompressor setMethod(int method) {
-        this.method = method;
+        switch (method) {
+            default:
+                emm = new VarianceError(imageData);
+                break;
+        }
         return this;
     }
 
     public ImageCompressor setThreshold(float threshold) {
-        this.threshold = method;
+        this.threshold = threshold;
         return this;
     }
 
@@ -45,15 +54,23 @@ public class ImageCompressor {
     }
 
     public void compress(File outputFile, File outputGif) throws IOException {
+        ImageQuadTreeBuilder builder = new ImageQuadTreeBuilder(emm, imageData, threshold, minimumBlockSize,
+                compressionLevel);
+
+        ImageQuadTree iqt = builder.build(0, 0, imageData.getWidth(), imageData.getHeight());
+        int[] buffer = ImageQuadTreeBuilder.getCompressedImageBuffer(iqt, imageData);
         // test
-        byte[] avg = ImageUtil.getAverageColor(imageData, 0, 0, imageData.getWidth(), imageData.getHeight());
+        // byte[] avg = ImageUtil.getAverageColor(imageData, 0, 0, imageData.getWidth(),
+        // imageData.getHeight());
 
-        BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
-        int[] packed = { 0 };
+        int imageSize = (int) Math.pow(2, iqt.getDepth() - 1);
+        BufferedImage image = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_INT_ARGB);
+        // int[] packed = { 0 };
 
-        packed[0] = (0b11111111 << 24) | ((avg[0] & 0xff) << 16) | ((avg[1] & 0xff) << 8) | (avg[2] & 0xff);
+        // packed[0] = (0b11111111 << 24) | ((avg[0] & 0xff) << 16) | ((avg[1] & 0xff)
+        // << 8) | (avg[2] & 0xff);
 
-        image.setRGB(0, 0, 1, 1, packed, 0, 1);
+        image.setRGB(0, 0, imageSize, imageSize, buffer, 0, imageSize);
 
         ImageIO.write(image, "png", outputFile);
 
@@ -83,7 +100,9 @@ public class ImageCompressor {
         int minimumBlockSize = safeScanner.getBoundedInput("minimum block size: ", Integer.class, 1, Integer.MAX_VALUE);
         float compressionLevel = safeScanner.getBoundedInput("compression target level: ", Float.class, 0.0f, 1.0f);
 
-        imageCompressor.setMethod(method).setCompressionLevel(compressionLevel).setMinimumBlockSize(minimumBlockSize)
+        imageCompressor.setMethod(method)
+                .setCompressionLevel(compressionLevel)
+                .setMinimumBlockSize(minimumBlockSize)
                 .setThreshold(threshold);
 
         String outputFileAbsolutePath = null;

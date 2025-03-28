@@ -5,33 +5,25 @@ import java.util.Scanner;
 
 public class SafeScanner {
     private Scanner scanner;
-    private boolean isDirty = false;
 
     public SafeScanner(Scanner scanner) {
         this.scanner = scanner;
+        scanner.useDelimiter("\\s+");
     }
 
     public <T> T getInput(String prompt, Class<T> type) {
-        if (isDirty) {
-            scanner.nextLine();
-            isDirty = false;
-        }
-
         while (true) {
             try {
                 System.out.print(prompt + ": ");
 
                 if (type == Integer.class) {
-                    isDirty = true;
                     return type.cast(scanner.nextInt());
                 } else if (type == Double.class) {
-                    isDirty = true;
                     return type.cast(scanner.nextDouble());
                 } else if (type == Boolean.class) {
-                    isDirty = true;
                     return type.cast(scanner.nextBoolean());
                 } else if (type == String.class) {
-                    return type.cast(scanner.nextLine());
+                    return type.cast(scanner.next());
                 } else {
                     throw new IllegalArgumentException("Unsupported data type");
                 }
@@ -44,7 +36,6 @@ public class SafeScanner {
     }
 
     public <T extends Number> T getBoundedInput(String prompt, Class<T> type, T min, T max) {
-        isDirty = true;
         while (true) {
             try {
                 System.out.print(prompt + " (" + min + " - " + max + "): ");

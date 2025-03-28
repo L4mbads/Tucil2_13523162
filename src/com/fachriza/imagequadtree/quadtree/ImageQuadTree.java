@@ -2,10 +2,10 @@ package com.fachriza.imagequadtree.quadtree;
 
 public class ImageQuadTree {
     private byte[] averageColor;
-
     private ImageQuadTree[] children;
 
     public ImageQuadTree(byte red, byte green, byte blue) {
+        this.averageColor = new byte[3];
         this.averageColor[0] = red;
         this.averageColor[1] = green;
         this.averageColor[2] = blue;
@@ -45,5 +45,13 @@ public class ImageQuadTree {
             return 1 + maxDepth;
         }
         return 1;
+    }
+
+    public byte[] getAverageColor() {
+        return averageColor;
+    }
+
+    public boolean isLeafNode() {
+        return children == null;
     }
 }
