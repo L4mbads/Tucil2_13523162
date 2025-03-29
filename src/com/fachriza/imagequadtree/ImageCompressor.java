@@ -79,60 +79,64 @@ public class ImageCompressor {
     }
 
     public static void main(String[] args) {
-        SafeScanner safeScanner = new SafeScanner(new Scanner(System.in));
-        String fileAbsolutePath = null;
-        File inputFile = null;
+        try (SafeScanner safeScanner = new SafeScanner(new Scanner(System.in))) {
 
-        while (inputFile == null || !inputFile.isFile()) {
-            fileAbsolutePath = safeScanner.getInput("Enter input file path", String.class);
-            inputFile = new File(fileAbsolutePath);
-        }
+            String fileAbsolutePath = null;
+            File inputFile = null;
 
-        ImageCompressor imageCompressor = null;
-        try {
-            imageCompressor = new ImageCompressor(inputFile);
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-            return;
-        }
+            while (inputFile == null || !inputFile.isFile()) {
+                fileAbsolutePath = safeScanner.getInput("Enter input file path", String.class);
+                inputFile = new File(fileAbsolutePath);
+            }
 
-        int method = safeScanner.getBoundedInput("method: ", Integer.class, 0, 4);
-        float threshold = safeScanner.getBoundedInput("threshold", Float.class, 0.0f, Float.MAX_VALUE);
-        int minimumBlockSize = safeScanner.getBoundedInput("minimum block size: ", Integer.class, 1, Integer.MAX_VALUE);
-        float compressionLevel = safeScanner.getBoundedInput("compression target level: ", Float.class, 0.0f, 1.0f);
+            ImageCompressor imageCompressor = null;
+            try {
+                imageCompressor = new ImageCompressor(inputFile);
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+                return;
+            }
 
-        imageCompressor.setMethod(method)
-                .setCompressionLevel(compressionLevel)
-                .setMinimumBlockSize(minimumBlockSize)
-                .setThreshold(threshold);
+            int method = safeScanner.getBoundedInput("method: ", Integer.class, 0, 4);
+            float threshold = safeScanner.getBoundedInput("threshold", Float.class, 0.0f, Float.MAX_VALUE);
+            int minimumBlockSize = safeScanner.getBoundedInput("minimum block size: ", Integer.class, 1,
+                    Integer.MAX_VALUE);
+            float compressionLevel = safeScanner.getBoundedInput("compression target level: ", Float.class, 0.0f, 1.0f);
 
-        String outputFileAbsolutePath = null;
-        File outputFile = null;
-        while (outputFile == null || outputFile.getParentFile() == null || !outputFile.getParentFile().isDirectory()) {
-            outputFileAbsolutePath = safeScanner.getInput("Enter output file path", String.class);
-            outputFile = new File(outputFileAbsolutePath);
-        }
-        if (outputFile.isFile()) {
-            System.out.println("File already exists. Will overwrite later");
-        }
+            imageCompressor.setMethod(method)
+                    .setCompressionLevel(compressionLevel)
+                    .setMinimumBlockSize(minimumBlockSize)
+                    .setThreshold(threshold);
 
-        String outputGifAbsolutePath = null;
-        File outputGif = null;
-        while (outputGif == null || outputGif.getParentFile() == null || !outputGif.getParentFile().isDirectory()) {
-            outputGifAbsolutePath = safeScanner.getInput("Enter output GIF path", String.class);
-            outputGif = new File(outputGifAbsolutePath);
-        }
-        if (outputGif.isFile()) {
-            System.out.println("File already exists. Will overwrite later");
-        }
+            String outputFileAbsolutePath = null;
+            File outputFile = null;
+            while (outputFile == null || outputFile.getParentFile() == null
+                    || !outputFile.getParentFile().isDirectory()) {
+                outputFileAbsolutePath = safeScanner.getInput("Enter output file path", String.class);
+                outputFile = new File(outputFileAbsolutePath);
+            }
+            if (outputFile.isFile()) {
+                System.out.println("File already exists. Will overwrite later");
+            }
 
-        try {
-            long startTime = System.nanoTime();
-            imageCompressor.compress(outputFile, outputGif);
+            String outputGifAbsolutePath = null;
+            File outputGif = null;
+            while (outputGif == null || outputGif.getParentFile() == null || !outputGif.getParentFile().isDirectory()) {
+                outputGifAbsolutePath = safeScanner.getInput("Enter output GIF path", String.class);
+                outputGif = new File(outputGifAbsolutePath);
+            }
+            if (outputGif.isFile()) {
+                System.out.println("File already exists. Will overwrite later");
+            }
 
-            System.out.println((System.nanoTime() - startTime) * 1e-6);
-        } catch (IOException e) {
-            e.printStackTrace();
+            try {
+                long startTime = System.nanoTime();
+                imageCompressor.compress(outputFile, outputGif);
+
+                System.out.println((System.nanoTime() - startTime) * 1e-6);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

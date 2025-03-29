@@ -3,7 +3,7 @@ package com.fachriza.imagequadtree.utils;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
-public class SafeScanner {
+public class SafeScanner implements AutoCloseable {
     private Scanner scanner;
 
     public SafeScanner(Scanner scanner) {
@@ -63,6 +63,12 @@ public class SafeScanner {
                 System.out.println("Invalid input. Please enter a valid " + type.getSimpleName() + ".");
                 scanner.nextLine();
             }
+        }
+    }
+
+    public void close() {
+        if (scanner != null) {
+            scanner.close();
         }
     }
 
