@@ -13,14 +13,18 @@ import com.fachriza.imagequadtree.image.errormeasuremethod.ErrorMeasurementMetho
 import com.fachriza.imagequadtree.image.errormeasuremethod.VarianceError;
 import com.fachriza.imagequadtree.quadtree.ImageQuadTree;
 import com.fachriza.imagequadtree.quadtree.ImageQuadTreeBuilder;
+import com.fachriza.imagequadtree.quadtree.ImageQuadTreeDrawer;
 import com.fachriza.imagequadtree.utils.ImageUtil;
 import com.fachriza.imagequadtree.utils.SafeScanner;
+import com.fachriza.imagequadtree.utils.TimeProfiler;
 
 public class ImageCompressor {
     private float threshold;
     private int minimumBlockSize;
     private float compressionLevel;
 
+    private ImageQuadTree root;
+    private ImageQuadTreeBuilder builder;
     private ErrorMeasurementMethod emm;
 
     private ImageData imageData;
@@ -53,33 +57,27 @@ public class ImageCompressor {
         return this;
     }
 
-    public void compress(File outputFile, File outputGif) throws IOException {
-        ImageQuadTreeBuilder builder = new ImageQuadTreeBuilder(emm, imageData, threshold, minimumBlockSize,
+    public ImageQuadTree compress() {
+        builder = new ImageQuadTreeBuilder(emm, imageData, threshold, minimumBlockSize,
                 compressionLevel);
 
-        ImageQuadTree iqt = builder.build(0, 0, imageData.getWidth(), imageData.getHeight());
-        int[] buffer = ImageQuadTreeBuilder.getCompressedImageBuffer(iqt, imageData);
-        // test
-        // byte[] avg = ImageUtil.getAverageColor(imageData, 0, 0, imageData.getWidth(),
-        // imageData.getHeight());
-        // ImageQuadTreeBuilder.printQuadTree(iqt, 0);
+        root = builder.build(0, 0, imageData.getWidth(), imageData.getHeight());
 
-        int imageSize = (int) Math.pow(2, iqt.getDepth() - 1);
-        BufferedImage image = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_INT_ARGB);
-        // int[] packed = { 0 };
-
-        // packed[0] = (0b11111111 << 24) | ((avg[0] & 0xff) << 16) | ((avg[1] & 0xff)
-        // << 8) | (avg[2] & 0xff);
-
-        image.setRGB(0, 0, imageSize, imageSize, buffer, 0, imageSize);
-
-        ImageIO.write(image, "png", outputFile);
-
-        return;
+        return root;
     }
 
+    public void draw(File outputFile, File outputGif) throws IOException {
+
+        ImageQuadTreeDrawer.draw(root, builder, outputFile);
+    }
+
+    /* ============================================ */
+    /* ==========MAIN PROGRAM ENTRY POINT========== */
+    /* ============================================ */
     public static void main(String[] args) {
         try (SafeScanner safeScanner = new SafeScanner(new Scanner(System.in))) {
+
+            TimeProfiler timeProfiler = new TimeProfiler("Image loading", "Tree construction", "Image saving");
 
             String fileAbsolutePath = null;
             File inputFile = null;
@@ -90,12 +88,14 @@ public class ImageCompressor {
             }
 
             ImageCompressor imageCompressor = null;
+            timeProfiler.startNext();
             try {
                 imageCompressor = new ImageCompressor(inputFile);
             } catch (IOException e) {
                 System.out.println(e.getMessage());
                 return;
             }
+            timeProfiler.stop();
 
             int method = safeScanner.getBoundedInput("method: ", Integer.class, 0, 4);
             float threshold = safeScanner.getBoundedInput("threshold", Float.class, 0.0f, Float.MAX_VALUE);
@@ -129,14 +129,19 @@ public class ImageCompressor {
                 System.out.println("File already exists. Will overwrite later");
             }
 
-            try {
-                long startTime = System.nanoTime();
-                imageCompressor.compress(outputFile, outputGif);
+            timeProfiler.startNext();
+            imageCompressor.compress();
+            timeProfiler.stop();
 
-                System.out.println((System.nanoTime() - startTime) * 1e-6);
+            timeProfiler.startNext();
+            try {
+                imageCompressor.draw(outputFile, outputGif);
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            timeProfiler.stop();
+
+            timeProfiler.print();
         }
     }
 }

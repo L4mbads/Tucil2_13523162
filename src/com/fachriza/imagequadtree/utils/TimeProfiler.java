@@ -1,0 +1,54 @@
+package com.fachriza.imagequadtree.utils;
+
+import java.lang.reflect.Array;
+import java.util.ArrayDeque;
+import java.util.Deque;
+
+public class TimeProfiler {
+    private float[] times;
+    private long tempTime;
+    private int currSection;
+    private String[] titles;
+
+    public TimeProfiler(String... string) {
+        titles = string;
+        times = new float[titles.length];
+        currSection = 0;
+    }
+
+    public void startNext() {
+        tempTime = System.nanoTime();
+    }
+
+    public void stop() {
+        times[currSection] = (System.nanoTime() - tempTime) * 1e-6f;
+        currSection++;
+    }
+
+    private Object[] getArray(Object val) {
+        int arrlength = Array.getLength(val);
+        Object[] outputArray = new Object[arrlength];
+        for (int i = 0; i < arrlength; ++i) {
+            outputArray[i] = Array.get(val, i);
+        }
+        return outputArray;
+    }
+
+    public void print() {
+        Deque<Integer> length = new ArrayDeque<Integer>();
+        for (final String title : titles) {
+            int l = title.length() + 2;
+            length.offer(l);
+            System.out.format("%-" + l + "s", title);
+        }
+        System.out.format("%-15s", "Total");
+        System.out.println();
+        float totalTime = 0;
+        for (final float time : times) {
+            totalTime += time;
+            System.out.format("%-" + length.removeFirst() + "s", time);
+        }
+        System.out.format("%-15s", totalTime);
+        System.out.println();
+    }
+}
