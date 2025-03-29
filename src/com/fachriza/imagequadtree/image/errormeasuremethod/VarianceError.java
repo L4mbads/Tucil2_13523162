@@ -10,8 +10,7 @@ public class VarianceError extends ErrorMeasurementMethod {
     }
 
     @Override
-    public float getErrorValue(int x, int y, int width, int height) {
-        float[] mean = ImageUtil.getAverageColor(imageData, x, y, width, height);
+    public float getErrorValue(float[] mean, int x, int y, int width, int height) {
         float[] variance = getVariance(mean, x, y, width, height);
         // for (int i = 0; i < variance.length; i++) {
         // System.out.println(mean[i]);

@@ -62,6 +62,7 @@ public class ImageCompressor {
         // test
         // byte[] avg = ImageUtil.getAverageColor(imageData, 0, 0, imageData.getWidth(),
         // imageData.getHeight());
+        // ImageQuadTreeBuilder.printQuadTree(iqt, 0);
 
         int imageSize = (int) Math.pow(2, iqt.getDepth() - 1);
         BufferedImage image = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_INT_ARGB);
@@ -96,7 +97,7 @@ public class ImageCompressor {
         }
 
         int method = safeScanner.getBoundedInput("method: ", Integer.class, 0, 4);
-        float threshold = safeScanner.getBoundedInput("threshold", Float.class, 0.0f, 10.0f);
+        float threshold = safeScanner.getBoundedInput("threshold", Float.class, 0.0f, Float.MAX_VALUE);
         int minimumBlockSize = safeScanner.getBoundedInput("minimum block size: ", Integer.class, 1, Integer.MAX_VALUE);
         float compressionLevel = safeScanner.getBoundedInput("compression target level: ", Float.class, 0.0f, 1.0f);
 
@@ -126,7 +127,10 @@ public class ImageCompressor {
         }
 
         try {
+            long startTime = System.nanoTime();
             imageCompressor.compress(outputFile, outputGif);
+
+            System.out.println((System.nanoTime() - startTime) * 1e-6);
         } catch (IOException e) {
             e.printStackTrace();
         }

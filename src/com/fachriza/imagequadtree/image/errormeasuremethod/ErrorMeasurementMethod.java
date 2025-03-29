@@ -5,5 +5,5 @@ import com.fachriza.imagequadtree.image.ImageData;
 public abstract class ErrorMeasurementMethod {
     protected ImageData imageData;
 
-    public abstract float getErrorValue(int x, int y, int width, int height);
+    public abstract float getErrorValue(float[] mean, int x, int y, int width, int height);
 }
