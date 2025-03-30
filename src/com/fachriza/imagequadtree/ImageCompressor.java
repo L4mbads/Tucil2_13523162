@@ -10,6 +10,7 @@ import java.awt.image.BufferedImage;
 
 import com.fachriza.imagequadtree.image.ImageData;
 import com.fachriza.imagequadtree.image.errormeasuremethod.ErrorMeasurementMethod;
+import com.fachriza.imagequadtree.image.errormeasuremethod.MADError;
 import com.fachriza.imagequadtree.image.errormeasuremethod.VarianceError;
 import com.fachriza.imagequadtree.quadtree.ImageQuadTree;
 import com.fachriza.imagequadtree.quadtree.ImageQuadTreeBuilder;
@@ -35,6 +36,12 @@ public class ImageCompressor {
 
     public ImageCompressor setMethod(int method) {
         switch (method) {
+            case 1:
+                emm = new VarianceError(imageData);
+                break;
+            case 2:
+                emm = new MADError(imageData);
+                break;
             default:
                 emm = new VarianceError(imageData);
                 break;
