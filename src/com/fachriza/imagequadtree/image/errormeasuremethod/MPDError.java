@@ -1,0 +1,59 @@
+package com.fachriza.imagequadtree.image.errormeasuremethod;
+
+import com.fachriza.imagequadtree.image.ImageData;
+
+public class MPDError extends ErrorMeasurementMethod {
+
+    public MPDError(ImageData imageData) {
+        this.imageData = imageData;
+    }
+
+    @Override
+    public float getErrorValue(float[] mean, int x, int y, int width, int height) {
+        float[] minMaxDifference = getMinMaxDifference(mean, x, y, width, height);
+        float avgDifference = (minMaxDifference[0] + minMaxDifference[1] + minMaxDifference[2]) / 3;
+        return avgDifference;
+    }
+
+    @Override
+    public float getMaxErrorValue() {
+        return 255.0f;
+    }
+
+    protected float[] getMinMaxDifference(float[] mean, int x, int y, int width, int height) {
+        float[] minVal = { Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE };
+        float[] maxVal = { -Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE };
+        for (int i = y; i < y + height; i++) {
+            for (int j = x; j < x + width; j++) {
+                float red = (imageData.getRed(j, i) & 0xff);
+                if (red < minVal[0]) {
+                    minVal[0] = red;
+                }
+                if (red > maxVal[0]) {
+                    maxVal[0] = red;
+                }
+
+                float green = (imageData.getGreen(j, i) & 0xff);
+                if (green < minVal[1]) {
+                    minVal[1] = green;
+                }
+                if (green > maxVal[1]) {
+                    maxVal[1] = green;
+                }
+
+                float blue = (imageData.getBlue(j, i) & 0xff);
+                if (blue < minVal[2]) {
+                    minVal[2] = blue;
+                }
+                if (blue > maxVal[2]) {
+                    maxVal[2] = blue;
+                }
+            }
+        }
+        for (int i = 0; i < 3; i++) {
+            maxVal[i] -= minVal[i];
+        }
+
+        return maxVal;
+    }
+}

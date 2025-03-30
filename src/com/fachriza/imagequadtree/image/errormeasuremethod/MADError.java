@@ -17,7 +17,7 @@ public class MADError extends ErrorMeasurementMethod {
 
     @Override
     public float getMaxErrorValue() {
-        return 16256.25f;
+        return 127.5f;
     }
 
     protected float[] getAbsoluteDifference(float[] mean, int x, int y, int width, int height) {
