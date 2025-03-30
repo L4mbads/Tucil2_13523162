@@ -1,7 +1,6 @@
 package com.fachriza.imagequadtree.image.errormeasuremethod;
 
 import com.fachriza.imagequadtree.image.ImageData;
-import com.fachriza.imagequadtree.utils.ImageUtil;
 
 public class VarianceError extends ErrorMeasurementMethod {
 
@@ -12,14 +11,13 @@ public class VarianceError extends ErrorMeasurementMethod {
     @Override
     public float getErrorValue(float[] mean, int x, int y, int width, int height) {
         float[] variance = getVariance(mean, x, y, width, height);
-        // for (int i = 0; i < variance.length; i++) {
-        // System.out.println(mean[i]);
-        // }
-        // for (int i = 0; i < variance.length; i++) {
-        // System.out.println(variance[i]);
-        // }
         float avgVariance = (variance[0] + variance[1] + variance[2]) / 3;
         return avgVariance;
+    }
+
+    @Override
+    public float getMaxErrorValue() {
+        return 16256.25f;
     }
 
     protected float[] getVariance(float[] mean, int x, int y, int width, int height) {

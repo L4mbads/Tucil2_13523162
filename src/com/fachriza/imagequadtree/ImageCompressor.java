@@ -66,6 +66,12 @@ public class ImageCompressor {
         return root;
     }
 
+    public float getMaxErrorValue() {
+        if (emm != null)
+            return emm.getMaxErrorValue();
+        return 0.0f;
+    }
+
     public void draw(File outputFile, File outputGif) throws IOException {
 
         ImageQuadTreeDrawer.draw(root, builder, outputFile);
@@ -98,13 +104,17 @@ public class ImageCompressor {
             timeProfiler.stop();
 
             int method = safeScanner.getBoundedInput("method: ", Integer.class, 0, 4);
-            float threshold = safeScanner.getBoundedInput("threshold", Float.class, 0.0f, Float.MAX_VALUE);
+            imageCompressor.setMethod(method);
+
+            float threshold = safeScanner.getBoundedInput("threshold", Float.class, 0.0f,
+                    imageCompressor.getMaxErrorValue());
+
             int minimumBlockSize = safeScanner.getBoundedInput("minimum block size: ", Integer.class, 1,
                     Integer.MAX_VALUE);
+
             float compressionLevel = safeScanner.getBoundedInput("compression target level: ", Float.class, 0.0f, 1.0f);
 
-            imageCompressor.setMethod(method)
-                    .setCompressionLevel(compressionLevel)
+            imageCompressor.setCompressionLevel(compressionLevel)
                     .setMinimumBlockSize(minimumBlockSize)
                     .setThreshold(threshold);
 
