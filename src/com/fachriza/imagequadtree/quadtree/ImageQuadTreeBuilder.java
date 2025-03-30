@@ -29,12 +29,19 @@ public class ImageQuadTreeBuilder {
         }
 
         float[] mean = ImageUtil.getAverageColor(imageData, x, y, width, height);
+        ImageQuadTree node = new ImageQuadTree((byte) mean[0], (byte) mean[1], (byte) mean[2]);
+        if (width * height == 1)
+            return node;
+
         float error = emm.getErrorValue(mean, x, y, width, height);
+
+        System.out.println(error);
 
         int halfWidth = (int) (Math.round((float) width / 2));
         int halfHeight = (int) (Math.round((float) height / 2));
-        ImageQuadTree node = new ImageQuadTree((byte) mean[0], (byte) mean[1], (byte) mean[2]);
-        if (error > threshold && halfHeight * halfWidth >= minimumBlockSize) {
+        int halfSize = halfWidth * halfHeight;
+
+        if (error > threshold && halfSize >= minimumBlockSize) {
             ImageQuadTree[] children = { build(x, y, halfWidth, halfHeight),
                     build(x + halfWidth, y, halfWidth, halfHeight),
                     build(x, y + halfHeight, halfWidth, halfHeight),

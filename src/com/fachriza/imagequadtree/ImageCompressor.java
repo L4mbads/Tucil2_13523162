@@ -9,6 +9,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 
 import com.fachriza.imagequadtree.image.ImageData;
+import com.fachriza.imagequadtree.image.errormeasuremethod.EntropyError;
 import com.fachriza.imagequadtree.image.errormeasuremethod.ErrorMeasurementMethod;
 import com.fachriza.imagequadtree.image.errormeasuremethod.MADError;
 import com.fachriza.imagequadtree.image.errormeasuremethod.MPDError;
@@ -45,6 +46,9 @@ public class ImageCompressor {
                 break;
             case 3:
                 emm = new MPDError(imageData);
+                break;
+            case 4:
+                emm = new EntropyError(imageData);
                 break;
             default:
                 emm = new VarianceError(imageData);
