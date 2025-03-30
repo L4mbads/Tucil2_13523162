@@ -11,12 +11,18 @@ public class ImageData {
     private int width;
     private int height;
 
-    public ImageData(BufferedImage img) {
+    private String format;
+
+    public ImageData(BufferedImage img, String format) {
         this.width = img.getWidth();
         this.height = img.getHeight();
 
-        // int[] pixels = new int[width * height];
-        // img.getRGB(0, 0, width, height, pixels, 0, width); // Convert to array
+        this.format = format;
+
+        // int[] packedBuffer = new int[width * height];
+        // img.getRGB(0, 0, width, height, packedBuffer, 0, width); // Convert to array
+
+        // i think this is faster
         BufferedImage image = new BufferedImage(width, height,
                 BufferedImage.TYPE_INT_RGB);
 
@@ -25,6 +31,7 @@ public class ImageData {
         g.dispose();
 
         int[] packedBuffer = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+
         int size = width * height;
         redBuffer = new byte[size];
         greenBuffer = new byte[size];
@@ -37,6 +44,10 @@ public class ImageData {
         }
     }
 
+    public String getFormat() {
+        return format;
+    }
+
     public int getWidth() {
         return width;
     }
@@ -44,14 +55,6 @@ public class ImageData {
     public int getHeight() {
         return height;
     }
-
-    // public int getPackedColor(int x, int y) {
-    // return packedBuffer[getBufferIndex(x, y)];
-    // }
-
-    // public int getPackedColor(int bufferIdx) {
-    // return packedBuffer[bufferIdx];
-    // }
 
     public int getBufferIndex(int x, int y) {
         return y * width + x;

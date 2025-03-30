@@ -1,5 +1,8 @@
 package com.fachriza.imagequadtree.utils;
 
+import java.io.File;
+import java.io.IOException;
+
 import com.fachriza.imagequadtree.image.ImageData;
 
 public class ImageUtil {
@@ -24,6 +27,15 @@ public class ImageUtil {
             // sumb[i] = (byte) avg;
         }
         return sum;
+    }
+
+    public static String getFormatName(File file) throws IOException {
+        String fileName = file.getName().toLowerCase();
+        if (fileName.endsWith(".jpg") || fileName.endsWith(".jpeg"))
+            return "jpeg";
+        if (fileName.endsWith(".png"))
+            return "png";
+        return null;
     }
 
 }

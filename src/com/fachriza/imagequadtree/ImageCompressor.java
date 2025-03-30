@@ -30,7 +30,7 @@ public class ImageCompressor {
     private ImageData imageData;
 
     public ImageCompressor(File inputFile) throws IOException {
-        imageData = new ImageData(ImageIO.read(inputFile));
+        imageData = new ImageData(ImageIO.read(inputFile), ImageUtil.getFormatName(inputFile));
     }
 
     public ImageCompressor setMethod(int method) {
@@ -110,10 +110,17 @@ public class ImageCompressor {
 
             String outputFileAbsolutePath = null;
             File outputFile = null;
-            while (outputFile == null || outputFile.getParentFile() == null
-                    || !outputFile.getParentFile().isDirectory()) {
-                outputFileAbsolutePath = safeScanner.getInput("Enter output file path", String.class);
-                outputFile = new File(outputFileAbsolutePath);
+            try {
+                while (outputFile == null
+                        || outputFile.getParentFile() == null
+                        || !outputFile.getParentFile().isDirectory()
+                        || ImageUtil.getFormatName(outputFile) != ImageUtil.getFormatName(inputFile)) {
+                    outputFileAbsolutePath = safeScanner.getInput("Enter output file path", String.class);
+                    outputFile = new File(outputFileAbsolutePath);
+                }
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                return;
             }
             if (outputFile.isFile()) {
                 System.out.println("File already exists. Will overwrite later");

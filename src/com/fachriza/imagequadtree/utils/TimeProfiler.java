@@ -25,15 +25,6 @@ public class TimeProfiler {
         currSection++;
     }
 
-    private Object[] getArray(Object val) {
-        int arrlength = Array.getLength(val);
-        Object[] outputArray = new Object[arrlength];
-        for (int i = 0; i < arrlength; ++i) {
-            outputArray[i] = Array.get(val, i);
-        }
-        return outputArray;
-    }
-
     public void print() {
         Deque<Integer> length = new ArrayDeque<Integer>();
         for (final String title : titles) {

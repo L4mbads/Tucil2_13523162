@@ -11,8 +11,6 @@ public class ImageQuadTreeBuilder {
     private int minimumBlockSize;
     private float compressionLevel;
 
-    public int[] lowestDimension = { Integer.MAX_VALUE, Integer.MAX_VALUE };
-
     public ImageQuadTreeBuilder(ErrorMeasurementMethod emm, ImageData imageData, float threshold, int minimumBlockSize,
             float compressionLevel) {
         this.emm = emm;
@@ -23,17 +21,18 @@ public class ImageQuadTreeBuilder {
     }
 
     public ImageQuadTree build(int x, int y, int width, int height) {
-
-        if (width < lowestDimension[0])
-            lowestDimension[0] = width;
-        if (height < lowestDimension[1])
-            lowestDimension[1] = height;
+        if (x + width >= imageData.getWidth()) {
+            width = imageData.getWidth() - 1 - x;
+        }
+        if (y + height >= imageData.getHeight()) {
+            height = imageData.getHeight() - 1 - y;
+        }
 
         float[] mean = ImageUtil.getAverageColor(imageData, x, y, width, height);
         float error = emm.getErrorValue(mean, x, y, width, height);
 
-        int halfWidth = width / 2;
-        int halfHeight = height / 2;
+        int halfWidth = (int) (Math.round((float) width / 2));
+        int halfHeight = (int) (Math.round((float) height / 2));
         ImageQuadTree node = new ImageQuadTree((byte) mean[0], (byte) mean[1], (byte) mean[2]);
         if (error > threshold && halfHeight >= minimumBlockSize && halfWidth >= minimumBlockSize) {
             ImageQuadTree[] children = { build(x, y, halfWidth, halfHeight),
@@ -45,5 +44,9 @@ public class ImageQuadTreeBuilder {
         }
         return node;
 
+    }
+
+    public ImageData getImageData() {
+        return imageData;
     }
 }
