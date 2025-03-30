@@ -21,10 +21,10 @@ public class ImageQuadTreeBuilder {
     }
 
     public ImageQuadTree build(int x, int y, int width, int height) {
-        if (x + width >= imageData.getWidth()) {
+        if (x + width > imageData.getWidth()) {
             width = imageData.getWidth() - 1 - x;
         }
-        if (y + height >= imageData.getHeight()) {
+        if (y + height > imageData.getHeight()) {
             height = imageData.getHeight() - 1 - y;
         }
 
@@ -34,7 +34,7 @@ public class ImageQuadTreeBuilder {
         int halfWidth = (int) (Math.round((float) width / 2));
         int halfHeight = (int) (Math.round((float) height / 2));
         ImageQuadTree node = new ImageQuadTree((byte) mean[0], (byte) mean[1], (byte) mean[2]);
-        if (error > threshold && halfHeight >= minimumBlockSize && halfWidth >= minimumBlockSize) {
+        if (error > threshold && halfHeight * halfWidth >= minimumBlockSize) {
             ImageQuadTree[] children = { build(x, y, halfWidth, halfHeight),
                     build(x + halfWidth, y, halfWidth, halfHeight),
                     build(x, y + halfHeight, halfWidth, halfHeight),

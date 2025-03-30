@@ -103,7 +103,12 @@ public class ImageCompressor {
             }
             timeProfiler.stop();
 
-            int method = safeScanner.getBoundedInput("method: ", Integer.class, 0, 4);
+            System.out.println("1. Variance");
+            System.out.println("2. Mean Absolute Difference");
+            System.out.println("3. Mean Pixel Difference");
+            System.out.println("4. Entropy");
+            System.out.println("5. SSIM");
+            int method = safeScanner.getBoundedInput("method: ", Integer.class, 1, 5);
             imageCompressor.setMethod(method);
 
             float threshold = safeScanner.getBoundedInput("threshold", Float.class, 0.0f,
