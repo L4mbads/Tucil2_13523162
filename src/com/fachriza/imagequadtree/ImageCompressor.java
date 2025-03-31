@@ -13,6 +13,7 @@ import com.fachriza.imagequadtree.image.errormeasuremethod.EntropyError;
 import com.fachriza.imagequadtree.image.errormeasuremethod.ErrorMeasurementMethod;
 import com.fachriza.imagequadtree.image.errormeasuremethod.MADError;
 import com.fachriza.imagequadtree.image.errormeasuremethod.MPDError;
+import com.fachriza.imagequadtree.image.errormeasuremethod.SSIMError;
 import com.fachriza.imagequadtree.image.errormeasuremethod.VarianceError;
 import com.fachriza.imagequadtree.quadtree.ImageQuadTree;
 import com.fachriza.imagequadtree.quadtree.ImageQuadTreeBuilder;
@@ -49,6 +50,9 @@ public class ImageCompressor {
                 break;
             case 4:
                 emm = new EntropyError(imageData);
+                break;
+            case 5:
+                emm = new SSIMError(imageData);
                 break;
             default:
                 emm = new VarianceError(imageData);
