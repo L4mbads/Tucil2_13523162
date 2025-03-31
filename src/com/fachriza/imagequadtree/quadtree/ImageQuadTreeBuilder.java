@@ -21,13 +21,6 @@ public class ImageQuadTreeBuilder {
     }
 
     public ImageQuadTree build(int x, int y, int width, int height) {
-        if (x + width > imageData.getWidth()) {
-            width = imageData.getWidth() - 1 - x;
-        }
-        if (y + height > imageData.getHeight()) {
-            height = imageData.getHeight() - 1 - y;
-        }
-
         float[] mean = ImageUtil.getAverageColor(imageData, x, y, width, height);
         ImageQuadTree node = new ImageQuadTree((byte) mean[0], (byte) mean[1], (byte) mean[2]);
         if (width * height == 1)
@@ -35,17 +28,20 @@ public class ImageQuadTreeBuilder {
 
         float error = emm.getErrorValue(mean, x, y, width, height);
 
-        System.out.println(error);
+        // System.out.println(error);
 
-        int halfWidth = (int) (Math.round((float) width / 2));
-        int halfHeight = (int) (Math.round((float) height / 2));
-        int halfSize = halfWidth * halfHeight;
+        int halfLowerWidth = width / 2;
+        int halfLowerHeight = height / 2;
+        int halfUpperWidth = width - halfLowerWidth;
+        int halfUpperHeight = height - halfLowerHeight;
+        int halfLowerSize = halfLowerHeight * halfLowerWidth;
+        int halfUpperSize = halfUpperHeight * halfUpperWidth;
 
-        if (error > threshold && halfSize >= minimumBlockSize) {
-            ImageQuadTree[] children = { build(x, y, halfWidth, halfHeight),
-                    build(x + halfWidth, y, halfWidth, halfHeight),
-                    build(x, y + halfHeight, halfWidth, halfHeight),
-                    build(x + halfWidth, y + halfHeight, halfWidth, halfHeight) };
+        if (error > threshold && halfLowerSize >= minimumBlockSize && halfUpperSize >= minimumBlockSize) {
+            ImageQuadTree[] children = { build(x, y, halfLowerWidth, halfLowerHeight),
+                    build(x + halfLowerWidth, y, halfUpperWidth, halfUpperHeight),
+                    build(x, y + halfLowerHeight, halfUpperWidth, halfUpperHeight),
+                    build(x + halfLowerWidth, y + halfLowerHeight, halfUpperWidth, halfUpperHeight) };
 
             node.setChildrenArray(children);
         }

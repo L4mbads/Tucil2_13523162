@@ -23,19 +23,21 @@ public class ImageQuadTreeDrawer {
             return;
         }
 
-        // int halfWidth = width / 2;
-        // int halfHeight = height / 2;
-        // int halfWidth = (int) (Math.ceil((float) width / 2));
-        // int halfHeight = (int) (Math.ceil((float) height / 2));
-        int halfWidth = (int) (Math.round((float) width / 2));
-        int halfHeight = (int) (Math.round((float) height / 2));
-        fillImageBuffer(buffer, iqt.getChildren(0), x, y, halfWidth, halfHeight, imageData, iteration + 1,
+        int halfLowerWidth = width / 2;
+        int halfLowerHeight = height / 2;
+        int halfUpperWidth = width - halfLowerWidth;
+        int halfUpperHeight = height - halfLowerHeight;
+
+        fillImageBuffer(buffer, iqt.getChildren(0), x, y, halfLowerWidth, halfLowerHeight, imageData, iteration + 1,
                 targetDepth);
-        fillImageBuffer(buffer, iqt.getChildren(1), x + halfWidth, y, halfWidth, halfHeight, imageData, iteration + 1,
+        fillImageBuffer(buffer, iqt.getChildren(1), x + halfLowerWidth, y, halfUpperWidth, halfUpperHeight, imageData,
+                iteration + 1,
                 targetDepth);
-        fillImageBuffer(buffer, iqt.getChildren(2), x, y + halfHeight, halfWidth, halfHeight, imageData, iteration + 1,
+        fillImageBuffer(buffer, iqt.getChildren(2), x, y + halfLowerHeight, halfUpperWidth, halfUpperHeight, imageData,
+                iteration + 1,
                 targetDepth);
-        fillImageBuffer(buffer, iqt.getChildren(3), x + halfWidth, y + halfHeight, halfWidth, halfHeight, imageData,
+        fillImageBuffer(buffer, iqt.getChildren(3), x + halfLowerWidth, y + halfLowerHeight, halfUpperWidth,
+                halfUpperHeight, imageData,
                 iteration + 1, targetDepth);
 
     }
