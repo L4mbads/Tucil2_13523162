@@ -80,7 +80,6 @@ public class ImageCompressor {
         this.compressionLevel = compressionLevel;
         if (compressionLevel > 0.0f) {
             System.out.println("auto adjust threshold");
-            // Assume linear
             threshold = compressionLevel * emm.getMaxErrorValue();
         }
         return this;
@@ -93,12 +92,12 @@ public class ImageCompressor {
 
     private void binaryRefine() throws IOException {
 
-        draw(outputFile);
+        draw();
 
         float upperBound = getMaxErrorValue();
         float lowerBound = 0.0f;
         float delta = getCompressRatio() - compressionLevel;
-        while (Math.abs(delta) > 0.01f) {
+        while (Math.abs(delta) > 0.01f && Math.abs(lowerBound - upperBound) > 0.1f) {
             if (delta < 0.0) {
                 lowerBound = threshold;
                 threshold = (threshold + upperBound) / 2.0f;
@@ -109,18 +108,18 @@ public class ImageCompressor {
 
             builder.setThreshold(threshold);
 
-            builder.adjust(root, 0, 0, imageData.getWidth(), imageData.getHeight());
+            // builder.adjust(root, 0, 0, imageData.getWidth(), imageData.getHeight());
+            // why is this faster what
+            root = builder.build(0, 0, imageData.getWidth(), imageData.getHeight());
 
-            draw(outputFile);
+            draw();
 
             delta = getCompressRatio() - compressionLevel;
-            // System.out.println(delta);
         }
     }
 
     public ImageQuadTree compress() throws IOException {
-        builder = new ImageQuadTreeBuilder(emm, imageData, threshold, minimumBlockSize,
-                compressionLevel);
+        builder = new ImageQuadTreeBuilder(emm, imageData, threshold, minimumBlockSize);
 
         root = builder.build(0, 0, imageData.getWidth(), imageData.getHeight());
 
@@ -137,9 +136,16 @@ public class ImageCompressor {
         return 0.0f;
     }
 
-    public void draw(File outputGif) throws IOException {
+    public int getNodeCount() {
+        return builder.getNodeCount();
+    }
 
+    public void draw() throws IOException {
         ImageQuadTreeDrawer.draw(root, builder, outputFile);
+    }
+
+    public void drawGIF(File outputGIF) throws Exception {
+        ImageQuadTreeDrawer.drawGIF(root, builder, outputGIF);
     }
 
     public boolean isTargetPercentageEnabled() {
@@ -151,26 +157,18 @@ public class ImageCompressor {
     /* ============================================ */
     public static void main(String[] args) {
         try (SafeScanner safeScanner = new SafeScanner(new Scanner(System.in))) {
-
             TimeProfiler timeProfiler = new TimeProfiler("Image loading", "Tree construction",
-                    "Tree adjustment + output");
+                    "Tree adjustment + output", "GIF output");
 
             String fileAbsolutePath = null;
             File inputFile = null;
-
             while (inputFile == null || !inputFile.isFile()) {
                 fileAbsolutePath = safeScanner.getInput("Enter input file path", String.class);
                 inputFile = new File(fileAbsolutePath);
             }
 
-            ImageCompressor imageCompressor = null;
             timeProfiler.startNext();
-            try {
-                imageCompressor = new ImageCompressor(inputFile);
-            } catch (IOException e) {
-                System.out.println(e.getMessage());
-                return;
-            }
+            ImageCompressor imageCompressor = new ImageCompressor(inputFile);
             timeProfiler.stop();
 
             System.out.println("1. Variance");
@@ -196,18 +194,14 @@ public class ImageCompressor {
 
             String outputFileAbsolutePath = null;
             File outputFile = null;
-            try {
-                while (outputFile == null
-                        || outputFile.getParentFile() == null
-                        || !outputFile.getParentFile().isDirectory()
-                        || ImageUtil.getFormatName(outputFile) != ImageUtil.getFormatName(inputFile)) {
-                    outputFileAbsolutePath = safeScanner.getInput("Enter output file path", String.class);
-                    outputFile = new File(outputFileAbsolutePath);
-                }
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-                return;
+            while (outputFile == null
+                    || outputFile.getParentFile() == null
+                    || !outputFile.getParentFile().isDirectory()
+                    || ImageUtil.getFormatName(outputFile) != ImageUtil.getFormatName(inputFile)) {
+                outputFileAbsolutePath = safeScanner.getInput("Enter output file path", String.class);
+                outputFile = new File(outputFileAbsolutePath);
             }
+
             if (outputFile.isFile()) {
                 System.out.println("File already exists. Will overwrite later");
             }
@@ -218,32 +212,33 @@ public class ImageCompressor {
             File outputGif = null;
             while (outputGif == null || outputGif.getParentFile() == null || !outputGif.getParentFile().isDirectory()) {
                 outputGifAbsolutePath = safeScanner.getInput("Enter output GIF path", String.class);
+                if (outputGifAbsolutePath.equalsIgnoreCase("n")) {
+                    System.out.println("No output GIF path included.");
+                    outputGif = null;
+                    break;
+                }
                 outputGif = new File(outputGifAbsolutePath);
             }
-            if (outputGif.isFile()) {
+            if (outputGif != null && outputGif.isFile()) {
                 System.out.println("File already exists. Will overwrite later");
             }
 
             timeProfiler.startNext();
-            ImageQuadTree tree;
-            try {
-                tree = imageCompressor.compress();
-            } catch (IOException e) {
-                System.out.println(e.getMessage());
-                return;
+            ImageQuadTree tree = imageCompressor.compress();
+            timeProfiler.stop();
+
+            timeProfiler.startNext();
+            if (imageCompressor.isTargetPercentageEnabled()) {
+                imageCompressor.binaryRefine();
+            } else {
+                imageCompressor.draw();
             }
             timeProfiler.stop();
 
             timeProfiler.startNext();
-            try {
-                if (imageCompressor.isTargetPercentageEnabled()) {
-                    imageCompressor.binaryRefine();
-                } else {
-                    imageCompressor.draw(outputGif);
-                }
-            } catch (IOException e) {
-                System.out.println(e.getMessage());
-                return;
+            if (outputGif != null) {
+                System.out.println("outputting gif");
+                imageCompressor.drawGIF(outputGif);
             }
             timeProfiler.stop();
 
@@ -252,6 +247,12 @@ public class ImageCompressor {
             System.out.println("Sesudah: " + (float) outputFile.length() / 1024.0f);
             System.out.println("Rasio: " + imageCompressor.getCompressRatio());
             System.out.println("Depth: " + tree.getDepth());
+            System.out.println("Node Count: " + imageCompressor.getNodeCount());
+        } catch (IOException e) {
+
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

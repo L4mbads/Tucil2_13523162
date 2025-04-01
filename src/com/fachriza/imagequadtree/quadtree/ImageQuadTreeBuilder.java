@@ -9,18 +9,37 @@ public class ImageQuadTreeBuilder {
     private ImageData imageData;
     private float threshold;
     private int minimumBlockSize;
+    private int nodeCount;
 
-    public ImageQuadTreeBuilder(ErrorMeasurementMethod emm, ImageData imageData, float threshold, int minimumBlockSize,
-            float compressionLevel) {
+    public ImageQuadTreeBuilder(
+            ErrorMeasurementMethod emm,
+            ImageData imageData,
+            float threshold,
+            int minimumBlockSize) {
         this.emm = emm;
         this.imageData = imageData;
         this.threshold = threshold;
         this.minimumBlockSize = minimumBlockSize;
+        this.nodeCount = 0;
+    }
+
+    public ImageData getImageData() {
+        return imageData;
+    }
+
+    public int getNodeCount() {
+        return nodeCount;
+    }
+
+    public void setThreshold(float threshold) {
+        this.threshold = threshold;
     }
 
     public ImageQuadTree build(int x, int y, int width, int height) {
+        nodeCount++;
         float[] mean = ImageUtil.getAverageColor(imageData, x, y, width, height);
         ImageQuadTree node = new ImageQuadTree((byte) mean[0], (byte) mean[1], (byte) mean[2], -1.0f);
+
         if (width * height == 1)
             return node;
 
@@ -37,8 +56,8 @@ public class ImageQuadTreeBuilder {
         if (error > threshold && halfLowerSize >= minimumBlockSize && halfUpperSize >= minimumBlockSize) {
             ImageQuadTree[] children = {
                     build(x, y, halfLowerWidth, halfLowerHeight),
-                    build(x + halfLowerWidth, y, halfUpperWidth, halfUpperHeight),
-                    build(x, y + halfLowerHeight, halfUpperWidth, halfUpperHeight),
+                    build(x + halfLowerWidth, y, halfUpperWidth, halfLowerHeight),
+                    build(x, y + halfLowerHeight, halfLowerWidth, halfUpperHeight),
                     build(x + halfLowerWidth, y + halfLowerHeight, halfUpperWidth, halfUpperHeight)
             };
 
@@ -54,15 +73,19 @@ public class ImageQuadTreeBuilder {
         int halfUpperWidth = width - halfLowerWidth;
         int halfUpperHeight = height - halfLowerHeight;
 
+        ImageQuadTree[] children = node.getChildrenArray();
         if (node.getError() < threshold) {
-            node.setChildrenArray(null);
+            if (children != null) {
+                nodeCount -= 4;
+                // node.setChildrenArray(null);
+            }
+            // node.isChildrenValid = false;
         } else {
-            ImageQuadTree[] children = node.getChildrenArray();
             if (children == null) {
                 ImageQuadTree[] new_children = {
                         build(x, y, halfLowerWidth, halfLowerHeight),
-                        build(x + halfLowerWidth, y, halfUpperWidth, halfUpperHeight),
-                        build(x, y + halfLowerHeight, halfUpperWidth, halfUpperHeight),
+                        build(x + halfLowerWidth, y, halfUpperWidth, halfLowerHeight),
+                        build(x, y + halfLowerHeight, halfLowerWidth, halfUpperHeight),
                         build(x + halfLowerWidth, y + halfLowerHeight, halfUpperWidth, halfUpperHeight)
                 };
 
@@ -70,18 +93,11 @@ public class ImageQuadTreeBuilder {
 
             } else {
                 adjust(children[0], x, y, halfLowerWidth, halfLowerHeight);
-                adjust(children[1], x + halfLowerWidth, y, halfUpperWidth, halfUpperHeight);
-                adjust(children[2], x, y + halfLowerHeight, halfUpperWidth, halfUpperHeight);
+                adjust(children[1], x + halfLowerWidth, y, halfUpperWidth, halfLowerHeight);
+                adjust(children[2], x, y + halfLowerHeight, halfLowerWidth, halfUpperHeight);
                 adjust(children[3], x + halfLowerWidth, y + halfLowerHeight, halfUpperWidth, halfUpperHeight);
             }
+            // node.isChildrenValid = true;
         }
-    }
-
-    public void setThreshold(float threshold) {
-        this.threshold = threshold;
-    }
-
-    public ImageData getImageData() {
-        return imageData;
     }
 }
