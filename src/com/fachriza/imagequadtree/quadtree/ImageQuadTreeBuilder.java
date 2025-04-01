@@ -31,6 +31,10 @@ public class ImageQuadTreeBuilder {
         return nodeCount;
     }
 
+    public void resetNodeCount() {
+        this.nodeCount = 0;
+    }
+
     public void setThreshold(float threshold) {
         this.threshold = threshold;
     }
@@ -40,7 +44,8 @@ public class ImageQuadTreeBuilder {
         float[] mean = ImageUtil.getAverageColor(imageData, x, y, width, height);
         ImageQuadTree node = new ImageQuadTree((byte) mean[0], (byte) mean[1], (byte) mean[2], -1.0f);
 
-        if (width * height == 1)
+        int size = width * height;
+        if (size == 1 || size == minimumBlockSize)
             return node;
 
         float error = emm.getErrorValue(mean, x, y, width, height);

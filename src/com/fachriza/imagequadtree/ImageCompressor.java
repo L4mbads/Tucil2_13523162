@@ -6,8 +6,6 @@ import java.util.Scanner;
 
 import javax.imageio.ImageIO;
 
-import java.awt.image.BufferedImage;
-
 import com.fachriza.imagequadtree.image.ImageData;
 import com.fachriza.imagequadtree.image.errormeasuremethod.EntropyError;
 import com.fachriza.imagequadtree.image.errormeasuremethod.ErrorMeasurementMethod;
@@ -107,6 +105,7 @@ public class ImageCompressor {
             }
 
             builder.setThreshold(threshold);
+            builder.resetNodeCount();
 
             // builder.adjust(root, 0, 0, imageData.getWidth(), imageData.getHeight());
             // why is this faster what
@@ -138,6 +137,10 @@ public class ImageCompressor {
 
     public int getNodeCount() {
         return builder.getNodeCount();
+    }
+
+    public ImageQuadTree getCompressedTree() {
+        return root;
     }
 
     public void draw() throws IOException {
@@ -224,7 +227,7 @@ public class ImageCompressor {
             }
 
             timeProfiler.startNext();
-            ImageQuadTree tree = imageCompressor.compress();
+            imageCompressor.compress();
             timeProfiler.stop();
 
             timeProfiler.startNext();
@@ -237,19 +240,18 @@ public class ImageCompressor {
 
             timeProfiler.startNext();
             if (outputGif != null) {
-                System.out.println("outputting gif");
+                System.out.println("Outputting gif");
                 imageCompressor.drawGIF(outputGif);
             }
             timeProfiler.stop();
 
             timeProfiler.print();
-            System.out.println("Sebelum: " + (float) inputFile.length() / 1024.0f);
-            System.out.println("Sesudah: " + (float) outputFile.length() / 1024.0f);
-            System.out.println("Rasio: " + imageCompressor.getCompressRatio());
-            System.out.println("Depth: " + tree.getDepth());
+            System.out.format("Sebelum: %.2fKB%n", (float) inputFile.length() / 1024.0f);
+            System.out.format("Sesudah: %.2fKB%n", (float) outputFile.length() / 1024.0f);
+            System.out.format("Rasio Kompresi: %.5f%% %n", imageCompressor.getCompressRatio() * 100.0f);
+            System.out.println("Depth: " + imageCompressor.getCompressedTree().getDepth());
             System.out.println("Node Count: " + imageCompressor.getNodeCount());
         } catch (IOException e) {
-
             e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();

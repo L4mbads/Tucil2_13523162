@@ -20,11 +20,8 @@ public class ImageUtil {
             }
         }
 
-        // byte[] sumb = new byte[3];
         for (int i = 0; i < 3; i++) {
             sum[i] /= count;
-            // int avg = Math.round((float) sum[i] / count);
-            // sumb[i] = (byte) avg;
         }
         return sum;
     }
