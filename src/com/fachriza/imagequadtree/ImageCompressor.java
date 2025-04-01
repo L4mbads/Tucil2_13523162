@@ -246,11 +246,11 @@ public class ImageCompressor {
             timeProfiler.stop();
 
             timeProfiler.print();
-            System.out.format("Sebelum: %.2fKB%n", (float) inputFile.length() / 1024.0f);
-            System.out.format("Sesudah: %.2fKB%n", (float) outputFile.length() / 1024.0f);
-            System.out.format("Rasio Kompresi: %.5f%% %n", imageCompressor.getCompressRatio() * 100.0f);
-            System.out.println("Depth: " + imageCompressor.getCompressedTree().getDepth());
-            System.out.println("Node Count: " + imageCompressor.getNodeCount());
+            System.out.format("Sebelum         : %.2fKB%n", (float) inputFile.length() / 1024.0f);
+            System.out.format("Sesudah         : %.2fKB%n", (float) outputFile.length() / 1024.0f);
+            System.out.format("Rasio Kompresi  : %.5f%%%n", imageCompressor.getCompressRatio() * 100.0f);
+            System.out.format("Kedalaman Pohon : %d%n", imageCompressor.getCompressedTree().getDepth());
+            System.out.format("Jumlah Simpul   : %d%n", imageCompressor.getNodeCount());
         } catch (IOException e) {
             e.printStackTrace();
         } catch (Exception e) {

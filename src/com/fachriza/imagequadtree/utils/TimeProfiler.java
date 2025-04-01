@@ -29,16 +29,15 @@ public class TimeProfiler {
         for (final String title : titles) {
             int l = title.length() + 2;
             length.offer(l);
-            System.out.format("%-" + l + "s", title);
+            System.out.format("%-" + String.valueOf(l) + "s", title);
         }
         System.out.format("%-15s", "Total");
         System.out.println();
         float totalTime = 0;
         for (final float time : times) {
             totalTime += time;
-            System.out.format("%-" + length.removeFirst() + "s", time);
+            System.out.format("%-" + String.valueOf(length.removeFirst()) + ".2f", time);
         }
-        System.out.format("%-15s", totalTime);
-        System.out.println();
+        System.out.format("%.2fms%n", totalTime);
     }
 }
