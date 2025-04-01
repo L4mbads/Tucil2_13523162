@@ -4,12 +4,12 @@ public class ImageQuadTree {
     private byte[] averageColor;
     private ImageQuadTree[] children;
 
-    public ImageQuadTree(byte red, byte green, byte blue) {
-        this.averageColor = new byte[3];
-        this.averageColor[0] = red;
-        this.averageColor[1] = green;
-        this.averageColor[2] = blue;
+    private float error;
+
+    public ImageQuadTree(byte red, byte green, byte blue, float error) {
+        this.averageColor = new byte[] { red, green, blue };
         this.children = null;
+        this.error = error;
     }
 
     public ImageQuadTree[] getChildrenArray() {
@@ -49,6 +49,14 @@ public class ImageQuadTree {
 
     public byte[] getAverageColor() {
         return averageColor;
+    }
+
+    public float getError() {
+        return error;
+    }
+
+    public void setError(float error) {
+        this.error = error;
     }
 
     public boolean isLeafNode() {

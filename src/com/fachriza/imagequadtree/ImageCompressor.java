@@ -31,9 +31,14 @@ public class ImageCompressor {
     private ImageQuadTreeBuilder builder;
     private ErrorMeasurementMethod emm;
 
+    private long fileSize;
+
+    private File outputFile;
+
     private ImageData imageData;
 
     public ImageCompressor(File inputFile) throws IOException {
+        fileSize = inputFile.length();
         imageData = new ImageData(ImageIO.read(inputFile), ImageUtil.getFormatName(inputFile));
     }
 
@@ -73,10 +78,47 @@ public class ImageCompressor {
 
     public ImageCompressor setCompressionLevel(float compressionLevel) {
         this.compressionLevel = compressionLevel;
+        if (compressionLevel > 0.0f) {
+            System.out.println("auto adjust threshold");
+            // Assume linear
+            threshold = compressionLevel * emm.getMaxErrorValue();
+        }
         return this;
     }
 
-    public ImageQuadTree compress() {
+    public ImageCompressor setOutputFile(File outputFile) {
+        this.outputFile = outputFile;
+        return this;
+    }
+
+    private void binaryRefine() throws IOException {
+
+        draw(outputFile);
+
+        float upperBound = getMaxErrorValue();
+        float lowerBound = 0.0f;
+        float delta = getCompressRatio() - compressionLevel;
+        while (Math.abs(delta) > 0.01f) {
+            if (delta < 0.0) {
+                lowerBound = threshold;
+                threshold = (threshold + upperBound) / 2.0f;
+            } else {
+                upperBound = threshold;
+                threshold = (lowerBound + threshold) / 2.0f;
+            }
+
+            builder.setThreshold(threshold);
+
+            builder.adjust(root, 0, 0, imageData.getWidth(), imageData.getHeight());
+
+            draw(outputFile);
+
+            delta = getCompressRatio() - compressionLevel;
+            // System.out.println(delta);
+        }
+    }
+
+    public ImageQuadTree compress() throws IOException {
         builder = new ImageQuadTreeBuilder(emm, imageData, threshold, minimumBlockSize,
                 compressionLevel);
 
@@ -85,15 +127,23 @@ public class ImageCompressor {
         return root;
     }
 
+    public float getCompressRatio() {
+        return (1.0f - ((float) outputFile.length() / fileSize));
+    }
+
     public float getMaxErrorValue() {
         if (emm != null)
             return emm.getMaxErrorValue();
         return 0.0f;
     }
 
-    public void draw(File outputFile, File outputGif) throws IOException {
+    public void draw(File outputGif) throws IOException {
 
         ImageQuadTreeDrawer.draw(root, builder, outputFile);
+    }
+
+    public boolean isTargetPercentageEnabled() {
+        return compressionLevel > 0.0f;
     }
 
     /* ============================================ */
@@ -102,7 +152,8 @@ public class ImageCompressor {
     public static void main(String[] args) {
         try (SafeScanner safeScanner = new SafeScanner(new Scanner(System.in))) {
 
-            TimeProfiler timeProfiler = new TimeProfiler("Image loading", "Tree construction", "Image saving");
+            TimeProfiler timeProfiler = new TimeProfiler("Image loading", "Tree construction",
+                    "Tree adjustment + output");
 
             String fileAbsolutePath = null;
             File inputFile = null;
@@ -138,9 +189,10 @@ public class ImageCompressor {
 
             float compressionLevel = safeScanner.getBoundedInput("compression target level: ", Float.class, 0.0f, 1.0f);
 
-            imageCompressor.setCompressionLevel(compressionLevel)
+            imageCompressor
                     .setMinimumBlockSize(minimumBlockSize)
-                    .setThreshold(threshold);
+                    .setThreshold(threshold)
+                    .setCompressionLevel(compressionLevel);
 
             String outputFileAbsolutePath = null;
             File outputFile = null;
@@ -160,6 +212,8 @@ public class ImageCompressor {
                 System.out.println("File already exists. Will overwrite later");
             }
 
+            imageCompressor.setOutputFile(outputFile);
+
             String outputGifAbsolutePath = null;
             File outputGif = null;
             while (outputGif == null || outputGif.getParentFile() == null || !outputGif.getParentFile().isDirectory()) {
@@ -171,18 +225,33 @@ public class ImageCompressor {
             }
 
             timeProfiler.startNext();
-            imageCompressor.compress();
+            ImageQuadTree tree;
+            try {
+                tree = imageCompressor.compress();
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+                return;
+            }
             timeProfiler.stop();
 
             timeProfiler.startNext();
             try {
-                imageCompressor.draw(outputFile, outputGif);
+                if (imageCompressor.isTargetPercentageEnabled()) {
+                    imageCompressor.binaryRefine();
+                } else {
+                    imageCompressor.draw(outputGif);
+                }
             } catch (IOException e) {
-                e.printStackTrace();
+                System.out.println(e.getMessage());
+                return;
             }
             timeProfiler.stop();
 
             timeProfiler.print();
+            System.out.println("Sebelum: " + (float) inputFile.length() / 1024.0f);
+            System.out.println("Sesudah: " + (float) outputFile.length() / 1024.0f);
+            System.out.println("Rasio: " + imageCompressor.getCompressRatio());
+            System.out.println("Depth: " + tree.getDepth());
         }
     }
 }
