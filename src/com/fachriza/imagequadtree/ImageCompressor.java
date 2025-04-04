@@ -15,7 +15,7 @@ import com.fachriza.imagequadtree.image.errormeasuremethod.SSIMError;
 import com.fachriza.imagequadtree.image.errormeasuremethod.VarianceError;
 import com.fachriza.imagequadtree.quadtree.ImageQuadTree;
 import com.fachriza.imagequadtree.quadtree.ImageQuadTreeBuilder;
-import com.fachriza.imagequadtree.quadtree.ImageQuadTreeDrawer;
+import com.fachriza.imagequadtree.quadtree.ImageQuadTreeExporter;
 import com.fachriza.imagequadtree.utils.ImageUtil;
 import com.fachriza.imagequadtree.utils.SafeScanner;
 import com.fachriza.imagequadtree.utils.TimeProfiler;
@@ -90,7 +90,7 @@ public class ImageCompressor {
 
     private void binaryRefine() throws IOException {
 
-        draw();
+        exportImage();
 
         float upperBound = getMaxErrorValue();
         float lowerBound = 0.0f;
@@ -111,7 +111,7 @@ public class ImageCompressor {
             // why is this faster what
             root = builder.build(0, 0, imageData.getWidth(), imageData.getHeight());
 
-            draw();
+            exportImage();
 
             delta = getCompressRatio() - compressionLevel;
         }
@@ -143,12 +143,12 @@ public class ImageCompressor {
         return root;
     }
 
-    public void draw() throws IOException {
-        ImageQuadTreeDrawer.draw(root, builder, outputFile);
+    public void exportImage() throws IOException {
+        ImageQuadTreeExporter.exportImage(root, builder, outputFile);
     }
 
-    public void drawGIF(File outputGIF) throws Exception {
-        ImageQuadTreeDrawer.drawGIF(root, builder, outputGIF);
+    public void exportGIF(File outputGIF) throws Exception {
+        ImageQuadTreeExporter.exportGIF(root, builder, outputGIF);
     }
 
     public boolean isTargetPercentageEnabled() {
@@ -234,14 +234,14 @@ public class ImageCompressor {
             if (imageCompressor.isTargetPercentageEnabled()) {
                 imageCompressor.binaryRefine();
             } else {
-                imageCompressor.draw();
+                imageCompressor.exportImage();
             }
             timeProfiler.stop();
 
             timeProfiler.startNext();
             if (outputGif != null) {
                 System.out.println("Outputting gif");
-                imageCompressor.drawGIF(outputGif);
+                imageCompressor.exportGIF(outputGif);
             }
             timeProfiler.stop();
 

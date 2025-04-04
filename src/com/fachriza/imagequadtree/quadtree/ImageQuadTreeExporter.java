@@ -11,7 +11,7 @@ import javax.imageio.ImageIO;
 import com.fachriza.imagequadtree.image.ImageData;
 import com.github.dragon66.AnimatedGIFWriter;
 
-public class ImageQuadTreeDrawer {
+public class ImageQuadTreeExporter {
 
     private static void fillImageBuffer(int[] buffer, ImageQuadTree iqt, int x, int y, int width,
             int height, ImageData imageData, int iteration, int targetDepth) {
@@ -56,7 +56,8 @@ public class ImageQuadTreeDrawer {
 
     }
 
-    public static void draw(ImageQuadTree iqt, ImageQuadTreeBuilder builder, File outputFile) throws IOException {
+    public static void exportImage(ImageQuadTree iqt, ImageQuadTreeBuilder builder, File outputFile)
+            throws IOException {
 
         ImageData imageData = builder.getImageData();
 
@@ -73,7 +74,7 @@ public class ImageQuadTreeDrawer {
         ImageIO.write(image, format, outputFile);
     }
 
-    public static void drawGIF(ImageQuadTree iqt, ImageQuadTreeBuilder builder, File outputFile) throws Exception {
+    public static void exportGIF(ImageQuadTree iqt, ImageQuadTreeBuilder builder, File outputFile) throws Exception {
         ImageData imageData = builder.getImageData();
 
         int width = imageData.getWidth();
