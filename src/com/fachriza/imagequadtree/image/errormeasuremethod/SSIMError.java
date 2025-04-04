@@ -10,7 +10,17 @@ public class SSIMError extends VarianceError {
 
     @Override
     public float getErrorValue(float[] mean, int x, int y, int width, int height) {
-        final float C2 = 0.01f;
+        /**
+         * C2 = ((K2)(L))^2
+         *
+         * where:
+         * K2 << 1, 0.01 was chosen
+         * L = color dynamic range, 255 for 8-bit channel
+         * thus:
+         * C2 = ((0.01)(255))^2
+         * C2 = 6.5025
+         */
+        final float C2 = 6.5025f;
         float[] variance = getVariance(mean, x, y, width, height);
         float[] SSIM = {
                 C2 / (variance[0] + C2),
