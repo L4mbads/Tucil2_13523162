@@ -26,28 +26,16 @@ public class MPDError extends ErrorMeasurementMethod {
         for (int i = y; i < y + height; i++) {
             for (int j = x; j < x + width; j++) {
                 float red = (imageData.getRed(j, i) & 0xff);
-                if (red < minVal[0]) {
-                    minVal[0] = red;
-                }
-                if (red > maxVal[0]) {
-                    maxVal[0] = red;
-                }
+                minVal[0] = red < minVal[0] ? red : minVal[0];
+                maxVal[0] = red > maxVal[0] ? red : maxVal[0];
 
                 float green = (imageData.getGreen(j, i) & 0xff);
-                if (green < minVal[1]) {
-                    minVal[1] = green;
-                }
-                if (green > maxVal[1]) {
-                    maxVal[1] = green;
-                }
+                minVal[1] = green < minVal[1] ? green : minVal[1];
+                maxVal[1] = green > maxVal[1] ? green : maxVal[1];
 
                 float blue = (imageData.getBlue(j, i) & 0xff);
-                if (blue < minVal[2]) {
-                    minVal[2] = blue;
-                }
-                if (blue > maxVal[2]) {
-                    maxVal[2] = blue;
-                }
+                minVal[2] = blue < minVal[2] ? blue : minVal[2];
+                maxVal[2] = blue > maxVal[2] ? blue : maxVal[2];
             }
         }
         for (int i = 0; i < 3; i++) {

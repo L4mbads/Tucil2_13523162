@@ -55,10 +55,9 @@ public class ImageQuadTreeBuilder {
         int halfLowerHeight = height / 2;
         int halfUpperWidth = width - halfLowerWidth;
         int halfUpperHeight = height - halfLowerHeight;
-        int halfLowerSize = halfLowerHeight * halfLowerWidth;
         int halfUpperSize = halfUpperHeight * halfUpperWidth;
 
-        if (error > threshold && halfLowerSize >= minimumBlockSize && halfUpperSize >= minimumBlockSize) {
+        if (error > threshold && halfUpperSize >= minimumBlockSize) {
             ImageQuadTree[] children = {
                     build(x, y, halfLowerWidth, halfLowerHeight),
                     build(x + halfLowerWidth, y, halfUpperWidth, halfLowerHeight),

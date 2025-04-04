@@ -55,9 +55,7 @@ public class ImageQuadTree {
             int maxDepth = 0;
             for (ImageQuadTree child : children) {
                 int thisDepth = child.getDepth();
-                if (thisDepth > maxDepth) {
-                    maxDepth = thisDepth;
-                }
+                maxDepth = thisDepth > maxDepth ? thisDepth : maxDepth;
             }
             return 1 + maxDepth;
         }

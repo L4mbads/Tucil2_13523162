@@ -32,15 +32,6 @@ public class ImageData {
 
         int[] packedBuffer = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
 
-        // int halfLowerWidth = width / 2;
-        // int halfLowerHeight = height / 2;
-        // int halfUpperWidth = width - halfLowerWidth;
-        // int halfUpperHeight = height - halfLowerHeight;
-        // int halfLowerSize = halfLowerHeight * halfLowerWidth;
-        // int halfUpperSize = halfUpperHeight * halfUpperWidth;
-
-        // if (halfLowerSize >= minimumBlockSize && halfUpperSize >= minimumBlockSize) {
-
         int size = width * height;
         redBuffer = new byte[size];
         greenBuffer = new byte[size];
