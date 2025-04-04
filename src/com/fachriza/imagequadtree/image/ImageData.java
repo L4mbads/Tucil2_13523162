@@ -1,8 +1,7 @@
 package com.fachriza.imagequadtree.image;
 
-import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferInt;
+import java.awt.image.DataBufferByte;
 
 public class ImageData {
     private byte[] redBuffer;
@@ -13,9 +12,9 @@ public class ImageData {
 
     private String format;
 
-    public ImageData(BufferedImage img, String format) {
-        this.width = img.getWidth();
-        this.height = img.getHeight();
+    public ImageData(BufferedImage image, String format) {
+        this.width = image.getWidth();
+        this.height = image.getHeight();
 
         this.format = format;
 
@@ -23,25 +22,50 @@ public class ImageData {
         // img.getRGB(0, 0, width, height, packedBuffer, 0, width); // Convert to array
 
         // i think this is faster
-        BufferedImage image = new BufferedImage(width, height,
-                BufferedImage.TYPE_INT_RGB);
+        // BufferedImage image = new BufferedImage(width, height,
+        // BufferedImage.TYPE_INT_RGB);
 
-        Graphics2D g = image.createGraphics();
-        g.drawImage(img, 0, 0, null);
-        g.dispose();
+        // Graphics2D g = image.createGraphics();
+        // g.drawImage(img, 0, 0, null);
+        // g.dispose();
 
-        int[] packedBuffer = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+        // int[] packedBuffer = ((DataBufferInt)
+        // image.getRaster().getDataBuffer()).getData();
 
+        // for (int i = 0; i < packedBuffer.length; i++) {
+        // int rgb = packedBuffer[i];
+        // redBuffer[i] = (byte) ((rgb >> 16) & 0xFF);
+        // greenBuffer[i] = (byte) ((rgb >> 8) & 0xFF);
+        // blueBuffer[i] = (byte) (rgb & 0xFF);
+        // }
+
+        // no this is faster
         int size = width * height;
         redBuffer = new byte[size];
         greenBuffer = new byte[size];
         blueBuffer = new byte[size];
-        for (int i = 0; i < packedBuffer.length; i++) {
-            int rgb = packedBuffer[i];
-            redBuffer[i] = (byte) ((rgb >> 16) & 0xFF);
-            greenBuffer[i] = (byte) ((rgb >> 8) & 0xFF);
-            blueBuffer[i] = (byte) (rgb & 0xFF);
+        byte[] pixelData = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+
+        boolean hasAlphaChannel = image.getAlphaRaster() != null;
+
+        if (hasAlphaChannel) {
+            int numberOfValues = 4;
+            for (int valueIndex = 0,
+                    i = 0; valueIndex + numberOfValues - 1 < pixelData.length; valueIndex += numberOfValues, i++) {
+                blueBuffer[i] = pixelData[valueIndex + 1];
+                greenBuffer[i] = pixelData[valueIndex + 2];
+                redBuffer[i] = pixelData[valueIndex + 3];
+            }
+        } else {
+            int numberOfValues = 3;
+            for (int valueIndex = 0,
+                    i = 0; valueIndex + numberOfValues - 1 < pixelData.length; valueIndex += numberOfValues, i++) {
+                blueBuffer[i] = pixelData[valueIndex];
+                greenBuffer[i] = pixelData[valueIndex + 1];
+                redBuffer[i] = pixelData[valueIndex + 2];
+            }
         }
+
     }
 
     public String getFormat() {
