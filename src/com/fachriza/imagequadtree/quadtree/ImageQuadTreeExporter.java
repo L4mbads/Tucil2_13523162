@@ -9,18 +9,31 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import com.fachriza.imagequadtree.image.ImageData;
+import com.fachriza.imagequadtree.utils.ImageUtil;
 import com.github.dragon66.AnimatedGIFWriter;
 
 public class ImageQuadTreeExporter {
 
-    private static void fillImageBuffer(int[] buffer, ImageQuadTree iqt, int x, int y, int width,
-            int height, ImageData imageData, int iteration, int targetDepth) {
-        if (iqt.isLeafNode() || (iteration == targetDepth)) {
-            byte[] mean = iqt.getAverageColor();
-            int packed = (0b11111111 << 24) | ((mean[0] & 0xff) << 16) | ((mean[1] & 0xff) << 8) | (mean[2] & 0xff);
-            for (int i = y; i <= y + height && i < imageData.getHeight(); i++) {
-                for (int j = x; j <= x + width && j < imageData.getWidth(); j++) {
-                    buffer[i * imageData.getWidth() + j] = packed;
+    private static void fillImageBuffer(
+            int[] buffer,
+            ImageQuadTree node,
+            int x,
+            int y,
+            int width,
+            int height,
+            ImageData imageData,
+            int iteration,
+            int targetDepth) {
+
+        if (node.isLeafNode() || (iteration == targetDepth)) {
+            int imageWidth = imageData.getWidth();
+            int imageHeight = imageData.getHeight();
+            int heightBound = y + height;
+            int widthBound = x + width;
+            int packed = ImageUtil.pack24BitColors(node.getAverageColor());
+            for (int i = y; i <= heightBound && i < imageHeight; i++) {
+                for (int j = x; j <= widthBound && j < imageWidth; j++) {
+                    buffer[i * imageWidth + j] = packed;
                 }
             }
             return;
@@ -31,21 +44,54 @@ public class ImageQuadTreeExporter {
         int halfUpperWidth = width - halfLowerWidth;
         int halfUpperHeight = height - halfLowerHeight;
 
-        fillImageBuffer(buffer, iqt.getChildren(0), x, y, halfLowerWidth, halfLowerHeight, imageData, iteration + 1,
+        int nextIteration = ++iteration;
+        fillImageBuffer(
+                buffer,
+                node.getChildren(0),
+                x,
+                y,
+                halfLowerWidth,
+                halfLowerHeight,
+                imageData,
+                nextIteration,
                 targetDepth);
-        fillImageBuffer(buffer, iqt.getChildren(1), x + halfLowerWidth, y, halfUpperWidth, halfLowerHeight, imageData,
-                iteration + 1,
+        fillImageBuffer(
+                buffer,
+                node.getChildren(1),
+                x + halfLowerWidth,
+                y,
+                halfUpperWidth,
+                halfLowerHeight,
+                imageData,
+                nextIteration,
                 targetDepth);
-        fillImageBuffer(buffer, iqt.getChildren(2), x, y + halfLowerHeight, halfLowerWidth, halfUpperHeight, imageData,
-                iteration + 1,
+        fillImageBuffer(
+                buffer,
+                node.getChildren(2),
+                x,
+                y + halfLowerHeight,
+                halfLowerWidth,
+                halfUpperHeight,
+                imageData,
+                nextIteration,
                 targetDepth);
-        fillImageBuffer(buffer, iqt.getChildren(3), x + halfLowerWidth, y + halfLowerHeight, halfUpperWidth,
-                halfUpperHeight, imageData,
-                iteration + 1, targetDepth);
+        fillImageBuffer(
+                buffer,
+                node.getChildren(3),
+                x + halfLowerWidth,
+                y + halfLowerHeight,
+                halfUpperWidth,
+                halfUpperHeight,
+                imageData,
+                nextIteration,
+                targetDepth);
 
     }
 
-    public static int[] getCompressedImageBuffer(ImageQuadTree root, ImageData imageData, int targetDepth) {
+    public static int[] getCompressedImageBuffer(
+            ImageQuadTree root,
+            ImageData imageData,
+            int targetDepth) {
 
         int width = imageData.getWidth();
         int height = imageData.getHeight();
@@ -56,7 +102,10 @@ public class ImageQuadTreeExporter {
 
     }
 
-    public static void exportImage(ImageQuadTree iqt, ImageQuadTreeBuilder builder, File outputFile)
+    public static void exportImage(
+            ImageQuadTree iqt,
+            ImageQuadTreeBuilder builder,
+            File outputFile)
             throws IOException {
 
         ImageData imageData = builder.getImageData();
@@ -74,7 +123,12 @@ public class ImageQuadTreeExporter {
         ImageIO.write(image, format, outputFile);
     }
 
-    public static void exportGIF(ImageQuadTree iqt, ImageQuadTreeBuilder builder, File outputFile) throws Exception {
+    public static void exportGIF(
+            ImageQuadTree iqt,
+            ImageQuadTreeBuilder builder,
+            File outputFile)
+            throws Exception {
+
         ImageData imageData = builder.getImageData();
 
         int width = imageData.getWidth();
@@ -83,6 +137,7 @@ public class ImageQuadTreeExporter {
         AnimatedGIFWriter writer = new AnimatedGIFWriter(false);
         OutputStream os = new FileOutputStream(outputFile);
         writer.prepareForWrite(os, -1, -1);
+
         int depth = iqt.getDepth();
         for (int i = 1; i <= depth; i++) {
             int[] buffer = getCompressedImageBuffer(iqt, imageData, i);

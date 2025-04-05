@@ -7,18 +7,9 @@ import java.util.Scanner;
 import javax.imageio.ImageIO;
 
 import com.fachriza.imagequadtree.image.ImageData;
-import com.fachriza.imagequadtree.image.errormeasuremethod.EntropyError;
-import com.fachriza.imagequadtree.image.errormeasuremethod.ErrorMeasurementMethod;
-import com.fachriza.imagequadtree.image.errormeasuremethod.MADError;
-import com.fachriza.imagequadtree.image.errormeasuremethod.MPDError;
-import com.fachriza.imagequadtree.image.errormeasuremethod.SSIMError;
-import com.fachriza.imagequadtree.image.errormeasuremethod.VarianceError;
-import com.fachriza.imagequadtree.quadtree.ImageQuadTree;
-import com.fachriza.imagequadtree.quadtree.ImageQuadTreeBuilder;
-import com.fachriza.imagequadtree.quadtree.ImageQuadTreeExporter;
-import com.fachriza.imagequadtree.utils.ImageUtil;
-import com.fachriza.imagequadtree.utils.SafeScanner;
-import com.fachriza.imagequadtree.utils.TimeProfiler;
+import com.fachriza.imagequadtree.image.errormeasuremethod.*;
+import com.fachriza.imagequadtree.quadtree.*;
+import com.fachriza.imagequadtree.utils.*;
 
 public class ImageCompressor {
     private float threshold;
@@ -30,7 +21,6 @@ public class ImageCompressor {
     private ErrorMeasurementMethod emm;
 
     private long fileSize;
-
     private File outputFile;
 
     private ImageData imageData;

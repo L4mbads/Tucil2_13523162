@@ -7,15 +7,14 @@ public class ImageData {
     private byte[] redBuffer;
     private byte[] greenBuffer;
     private byte[] blueBuffer;
+
     private int width;
     private int height;
-
     private String format;
 
     public ImageData(BufferedImage image, String format) {
         this.width = image.getWidth();
         this.height = image.getHeight();
-
         this.format = format;
 
         // int[] packedBuffer = new int[width * height];
@@ -41,29 +40,20 @@ public class ImageData {
 
         // no this is faster
         int size = width * height;
+
         redBuffer = new byte[size];
         greenBuffer = new byte[size];
         blueBuffer = new byte[size];
         byte[] pixelData = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
 
         boolean hasAlphaChannel = image.getAlphaRaster() != null;
+        int numberOfValues = hasAlphaChannel ? 4 : 3;
+        int valueIndex = hasAlphaChannel ? 1 : 0;
 
-        if (hasAlphaChannel) {
-            int numberOfValues = 4;
-            for (int valueIndex = 0,
-                    i = 0; valueIndex + numberOfValues - 1 < pixelData.length; valueIndex += numberOfValues, i++) {
-                blueBuffer[i] = pixelData[valueIndex + 1];
-                greenBuffer[i] = pixelData[valueIndex + 2];
-                redBuffer[i] = pixelData[valueIndex + 3];
-            }
-        } else {
-            int numberOfValues = 3;
-            for (int valueIndex = 0,
-                    i = 0; valueIndex + numberOfValues - 1 < pixelData.length; valueIndex += numberOfValues, i++) {
-                blueBuffer[i] = pixelData[valueIndex];
-                greenBuffer[i] = pixelData[valueIndex + 1];
-                redBuffer[i] = pixelData[valueIndex + 2];
-            }
+        for (int i = 0; valueIndex + numberOfValues - 1 < pixelData.length; valueIndex += numberOfValues, i++) {
+            blueBuffer[i] = pixelData[valueIndex];
+            greenBuffer[i] = pixelData[valueIndex + 1];
+            redBuffer[i] = pixelData[valueIndex + 2];
         }
 
     }

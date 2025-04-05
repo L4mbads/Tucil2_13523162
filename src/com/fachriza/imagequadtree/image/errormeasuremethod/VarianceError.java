@@ -5,11 +5,17 @@ import com.fachriza.imagequadtree.image.ImageData;
 public class VarianceError extends ErrorMeasurementMethod {
 
     public VarianceError(ImageData imageData) {
-        this.imageData = imageData;
+        super(imageData);
     }
 
     @Override
-    public float getErrorValue(float[] mean, int x, int y, int width, int height) {
+    public float getErrorValue(
+            float[] mean,
+            int x,
+            int y,
+            int width,
+            int height) {
+
         float[] variance = getVariance(mean, x, y, width, height);
         float avgVariance = (variance[0] + variance[1] + variance[2]) / 3;
         return avgVariance;
@@ -20,7 +26,13 @@ public class VarianceError extends ErrorMeasurementMethod {
         return 16256.25f;
     }
 
-    protected float[] getVariance(float[] mean, int x, int y, int width, int height) {
+    protected float[] getVariance(
+            float[] mean,
+            int x,
+            int y,
+            int width,
+            int height) {
+
         float[] variance = { 0, 0, 0 };
         int count = width * height;
         for (int i = y; i < y + height; i++) {
@@ -33,9 +45,11 @@ public class VarianceError extends ErrorMeasurementMethod {
                 variance[2] += (varB * varB);
             }
         }
+
         for (int i = 0; i < 3; i++) {
             variance[i] /= count;
         }
+
         return variance;
     }
 }
