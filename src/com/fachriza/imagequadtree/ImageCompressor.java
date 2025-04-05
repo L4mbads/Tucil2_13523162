@@ -77,7 +77,7 @@ public class ImageCompressor {
     public ImageCompressor setCompressionLevel(float compressionLevel) {
         this.compressionLevel = compressionLevel;
         if (compressionLevel > 0.0f) {
-            System.out.println("auto adjust threshold");
+            System.out.println("Threshold akan diatur otomatis");
             threshold = compressionLevel * emm.getMaxErrorValue();
         }
         return this;
@@ -165,7 +165,7 @@ public class ImageCompressor {
             String fileAbsolutePath = null;
             File inputFile = null;
             while (inputFile == null || !inputFile.isFile()) {
-                fileAbsolutePath = safeScanner.getInput("Enter input file path", String.class);
+                fileAbsolutePath = safeScanner.getInput("Alamat absolut gambar", String.class);
                 inputFile = new File(fileAbsolutePath);
             }
 
@@ -174,21 +174,21 @@ public class ImageCompressor {
             ImageCompressor imageCompressor = new ImageCompressor(inputFile);
             timeProfiler.stopSection();
 
-            System.out.println("1. Variance");
-            System.out.println("2. Mean Absolute Difference");
-            System.out.println("3. Mean Pixel Difference");
-            System.out.println("4. Entropy");
-            System.out.println("5. SSIM");
+            System.out.println("1. Varians");
+            System.out.println("2. Mean Absolute Difference (MAD)");
+            System.out.println("3. Mean Pixel Difference (MPD)");
+            System.out.println("4. Entropi");
+            System.out.println("5. Structural Similarity Index Measure (SSIM)");
             int method = safeScanner.getBoundedInput("method: ", Integer.class, 1, 5);
             imageCompressor.setMethod(method);
 
-            float threshold = safeScanner.getBoundedInput("threshold", Float.class, 0.0f,
+            float threshold = safeScanner.getBoundedInput("Threshold nilai error", Float.class, 0.0f,
                     imageCompressor.getMaxErrorValue());
 
-            int minimumBlockSize = safeScanner.getBoundedInput("minimum block size: ", Integer.class, 1,
+            int minimumBlockSize = safeScanner.getBoundedInput("Ukuran blok minimum", Integer.class, 1,
                     Integer.MAX_VALUE);
 
-            float compressionLevel = safeScanner.getBoundedInput("compression target level: ", Float.class, 0.0f, 1.0f);
+            float compressionLevel = safeScanner.getBoundedInput("Target persentase kompresi", Float.class, 0.0f, 1.0f);
 
             imageCompressor
                     .setMinimumBlockSize(minimumBlockSize)
@@ -201,12 +201,11 @@ public class ImageCompressor {
                     || outputFile.getParentFile() == null
                     || !outputFile.getParentFile().isDirectory()
                     || ImageUtil.getFormatName(outputFile) != ImageUtil.getFormatName(inputFile)) {
-                outputFileAbsolutePath = safeScanner.getInput("Enter output file path", String.class);
+                outputFileAbsolutePath = safeScanner.getInput("Alamat absolut gambar hasil", String.class);
                 outputFile = new File(outputFileAbsolutePath);
             }
-
             if (outputFile.isFile()) {
-                System.out.println("File already exists. Will overwrite later");
+                System.out.println("Gambar sudah ada. Akan dilakukan overwrite");
             }
 
             imageCompressor.setOutputFile(outputFile);
@@ -214,16 +213,16 @@ public class ImageCompressor {
             String outputGifAbsolutePath = null;
             File outputGif = null;
             while (outputGif == null || outputGif.getParentFile() == null || !outputGif.getParentFile().isDirectory()) {
-                outputGifAbsolutePath = safeScanner.getInput("Enter output GIF path", String.class);
+                outputGifAbsolutePath = safeScanner.getInput("Alamat absolut GIF hasil (n untuk skip)", String.class);
                 if (outputGifAbsolutePath.equalsIgnoreCase("n")) {
-                    System.out.println("No output GIF path included.");
+                    System.out.println("Tidak akan membuat GIF");
                     outputGif = null;
                     break;
                 }
                 outputGif = new File(outputGifAbsolutePath);
             }
             if (outputGif != null && outputGif.isFile()) {
-                System.out.println("File already exists. Will overwrite later");
+                System.out.println("GIF sudah ada. Akan dilakukan overwrite");
             }
 
             timeProfiler.startSection("Konstruksi Quadtree");

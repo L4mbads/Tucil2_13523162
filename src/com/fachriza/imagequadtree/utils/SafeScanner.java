@@ -25,11 +25,11 @@ public class SafeScanner implements AutoCloseable {
                 } else if (type == String.class) {
                     return type.cast(scanner.next());
                 } else {
-                    throw new IllegalArgumentException("Unsupported data type");
+                    throw new IllegalArgumentException("Tipe data tidak dikenal");
                 }
 
             } catch (InputMismatchException e) {
-                System.out.println("Invalid input. Please enter a valid " + type.getSimpleName());
+                System.out.println("Input invalid. Masukkan " + type.getSimpleName());
                 scanner.nextLine();
             }
         }
@@ -50,17 +50,17 @@ public class SafeScanner implements AutoCloseable {
                 } else if (type == Float.class) {
                     value = scanner.nextFloat();
                 } else {
-                    throw new IllegalArgumentException("Unsupported numeric type");
+                    throw new IllegalArgumentException("Tipe numerik tidak disupport");
                 }
 
                 if (value.doubleValue() < min.doubleValue() || value.doubleValue() > max.doubleValue()) {
-                    System.out.println("Error: Input must be between " + min + " and " + max + ".");
+                    System.out.println("Input harus berada di antara " + min + " dan " + max + ".");
                 } else {
                     return type.cast(value);
                 }
 
             } catch (InputMismatchException e) {
-                System.out.println("Invalid input. Please enter a valid " + type.getSimpleName() + ".");
+                System.out.println("Input invalid. Masukkan " + type.getSimpleName());
                 scanner.nextLine();
             }
         }
