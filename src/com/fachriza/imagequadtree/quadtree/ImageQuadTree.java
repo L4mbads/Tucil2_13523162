@@ -1,16 +1,13 @@
 package com.fachriza.imagequadtree.quadtree;
 
 public class ImageQuadTree {
-    private byte[] averageColor;
-    private ImageQuadTree[] children;
-    private float error;
-    // public boolean isChildrenValid;
 
-    public ImageQuadTree(byte red, byte green, byte blue, float error) {
+    public final byte[] averageColor;
+    private ImageQuadTree[] children;
+
+    public ImageQuadTree(byte red, byte green, byte blue) {
         this.averageColor = new byte[] { red, green, blue };
         this.children = null;
-        this.error = error;
-        // isChildrenValid = true;
     }
 
     public ImageQuadTree[] getChildrenArray() {
@@ -32,18 +29,6 @@ public class ImageQuadTree {
             children = new ImageQuadTree[4];
         }
         children[idx] = child;
-    }
-
-    public byte[] getAverageColor() {
-        return averageColor;
-    }
-
-    public float getError() {
-        return error;
-    }
-
-    public void setError(float error) {
-        this.error = error;
     }
 
     public boolean isLeafNode() {

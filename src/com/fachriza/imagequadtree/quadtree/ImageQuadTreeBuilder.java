@@ -7,6 +7,7 @@ import com.fachriza.imagequadtree.image.errormeasuremethod.ErrorMeasurementMetho
 import com.fachriza.imagequadtree.utils.ImageUtil;
 
 public class ImageQuadTreeBuilder {
+
     private ErrorMeasurementMethod emm;
     private ImageData imageData;
     private float threshold;
@@ -47,14 +48,13 @@ public class ImageQuadTreeBuilder {
         nodeCount++;
 
         float[] mean = ImageUtil.getAverageColor(imageData, x, y, width, height);
-        ImageQuadTree node = new ImageQuadTree((byte) mean[0], (byte) mean[1], (byte) mean[2], -1.0f);
+        ImageQuadTree node = new ImageQuadTree((byte) mean[0], (byte) mean[1], (byte) mean[2]);
 
         int size = width * height;
         if (size == 1 || size <= minimumBlockSize)
             return node;
 
         float error = emm.getErrorValue(mean, x, y, width, height);
-        node.setError(error);
 
         int halfLowerWidth = width / 2;
         int halfLowerHeight = height / 2;
@@ -137,40 +137,6 @@ public class ImageQuadTreeBuilder {
         }
         return node;
 
-    }
-
-    public void adjust(ImageQuadTree node, int x, int y, int width, int height) {
-        int halfLowerWidth = width / 2;
-        int halfLowerHeight = height / 2;
-        int halfUpperWidth = width - halfLowerWidth;
-        int halfUpperHeight = height - halfLowerHeight;
-
-        ImageQuadTree[] children = node.getChildrenArray();
-        if (node.getError() < threshold) {
-            if (children != null) {
-                nodeCount -= 4;
-                // node.setChildrenArray(null);
-            }
-            // node.isChildrenValid = false;
-        } else {
-            if (children == null) {
-                ImageQuadTree[] new_children = {
-                        build(x, y, halfLowerWidth, halfLowerHeight),
-                        build(x + halfLowerWidth, y, halfUpperWidth, halfLowerHeight),
-                        build(x, y + halfLowerHeight, halfLowerWidth, halfUpperHeight),
-                        build(x + halfLowerWidth, y + halfLowerHeight, halfUpperWidth, halfUpperHeight)
-                };
-
-                node.setChildrenArray(new_children);
-
-            } else {
-                adjust(children[0], x, y, halfLowerWidth, halfLowerHeight);
-                adjust(children[1], x + halfLowerWidth, y, halfUpperWidth, halfLowerHeight);
-                adjust(children[2], x, y + halfLowerHeight, halfLowerWidth, halfUpperHeight);
-                adjust(children[3], x + halfLowerWidth, y + halfLowerHeight, halfUpperWidth, halfUpperHeight);
-            }
-            // node.isChildrenValid = true;
-        }
     }
 
     private class BuildQuadTreeAsync extends RecursiveTask<ImageQuadTree> {

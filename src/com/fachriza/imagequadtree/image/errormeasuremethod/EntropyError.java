@@ -23,6 +23,7 @@ public class EntropyError extends ErrorMeasurementMethod {
 
     @Override
     public float getMaxErrorValue() {
+        // Maximum entropy for 8-bit color channel
         return 8.0f;
     }
 
@@ -35,9 +36,8 @@ public class EntropyError extends ErrorMeasurementMethod {
         int[] redFrequency = new int[256];
         int[] greenFrequency = new int[256];
         int[] blueFrequency = new int[256];
-        float[] entropy = { 0, 0, 0 };
 
-        int count = width * height;
+        // Count color frequency
         for (int i = y; i < y + height; i++) {
             for (int j = x; j < x + width; j++) {
                 byte red = imageData.getRed(j, i);
@@ -49,6 +49,10 @@ public class EntropyError extends ErrorMeasurementMethod {
             }
         }
 
+        int count = width * height;
+        float[] entropy = { 0, 0, 0 };
+
+        // Calculate entropy
         for (int i = 0; i < 255; i++) {
             int red = redFrequency[i];
             if (red > 0) {

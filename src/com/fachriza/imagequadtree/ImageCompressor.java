@@ -12,6 +12,7 @@ import com.fachriza.imagequadtree.quadtree.*;
 import com.fachriza.imagequadtree.utils.*;
 
 public class ImageCompressor {
+
     private float threshold;
     private int minimumBlockSize;
     private float compressionLevel;
@@ -47,9 +48,6 @@ public class ImageCompressor {
             case 5:
                 emm = new SSIMError(imageData);
                 break;
-            default:
-                emm = new VarianceError(imageData);
-                break;
         }
         return this;
     }
@@ -82,10 +80,16 @@ public class ImageCompressor {
 
         exportImage();
 
+        int width = imageData.width;
+        int height = imageData.height;
+
         float upperBound = getMaxErrorValue();
         float lowerBound = 0.0f;
         float delta = getCompressRatio() - compressionLevel;
-        while (Math.abs(delta) > 0.01f && Math.abs(lowerBound - upperBound) > 0.1f) {
+
+        byte iteration = 0;
+        while (iteration < 100 && Math.abs(delta) > 0.01f && Math.abs(lowerBound - upperBound) > 0.1f) {
+            iteration++;
             if (delta < 0.0) {
                 lowerBound = threshold;
                 threshold = (threshold + upperBound) / 2.0f;
@@ -99,7 +103,7 @@ public class ImageCompressor {
 
             // builder.adjust(root, 0, 0, imageData.getWidth(), imageData.getHeight());
             // why is this faster what
-            root = builder.build(0, 0, imageData.getWidth(), imageData.getHeight());
+            root = builder.build(0, 0, width, height);
 
             exportImage();
 
@@ -110,7 +114,7 @@ public class ImageCompressor {
     public ImageQuadTree compress() throws IOException {
         builder = new ImageQuadTreeBuilder(emm, imageData, threshold, minimumBlockSize);
 
-        root = builder.build(0, 0, imageData.getWidth(), imageData.getHeight());
+        root = builder.build(0, 0, imageData.width, imageData.height);
 
         return root;
     }
@@ -146,12 +150,13 @@ public class ImageCompressor {
     }
 
     /* ============================================ */
-    /* ==========MAIN PROGRAM ENTRY POINT========== */
+    /* ========= MAIN PROGRAM ENTRY POINT ========= */
     /* ============================================ */
     public static void main(String[] args) {
         try (SafeScanner safeScanner = new SafeScanner(new Scanner(System.in))) {
             TimeProfiler timeProfiler = new TimeProfiler();
 
+            // Read input image path
             String fileAbsolutePath = null;
             File inputFile = null;
             while (inputFile == null || !inputFile.isFile()) {
@@ -159,32 +164,39 @@ public class ImageCompressor {
                 inputFile = new File(fileAbsolutePath);
             }
 
+            // Load input image
             timeProfiler.startSection("Memuat Gambar");
-            System.out.println("Memuat Gambar...");
+            System.out.println("Memuat gambar...");
             ImageCompressor imageCompressor = new ImageCompressor(inputFile);
             timeProfiler.stopSection();
 
+            // Read method
             System.out.println("1. Varians");
             System.out.println("2. Mean Absolute Difference (MAD)");
             System.out.println("3. Mean Pixel Difference (MPD)");
             System.out.println("4. Entropi");
             System.out.println("5. Structural Similarity Index Measure (SSIM)");
-            int method = safeScanner.getBoundedInput("method: ", Integer.class, 1, 5);
+            int method = safeScanner.getBoundedInput("Metode: ", Integer.class, 1, 5);
             imageCompressor.setMethod(method);
 
+            // Read threshold
             float threshold = safeScanner.getBoundedInput("Threshold nilai error", Float.class, 0.0f,
                     imageCompressor.getMaxErrorValue());
 
+            // Read minimum block size
             int minimumBlockSize = safeScanner.getBoundedInput("Ukuran blok minimum", Integer.class, 1,
                     Integer.MAX_VALUE);
 
+            // Read target compression percentage
             float compressionLevel = safeScanner.getBoundedInput("Target persentase kompresi", Float.class, 0.0f, 1.0f);
 
+            // Set compression parameters
             imageCompressor
                     .setMinimumBlockSize(minimumBlockSize)
                     .setThreshold(threshold)
                     .setCompressionLevel(compressionLevel);
 
+            // Read output image path
             String outputFileAbsolutePath = null;
             File outputFile = null;
             while (outputFile == null
@@ -200,9 +212,12 @@ public class ImageCompressor {
 
             imageCompressor.setOutputFile(outputFile);
 
+            // Read output GIF path
             String outputGifAbsolutePath = null;
             File outputGif = null;
-            while (outputGif == null || outputGif.getParentFile() == null || !outputGif.getParentFile().isDirectory()) {
+            while (outputGif == null
+                    || outputGif.getParentFile() == null
+                    || !outputGif.getParentFile().isDirectory()) {
                 outputGifAbsolutePath = safeScanner.getInput("Alamat absolut GIF hasil (n untuk skip)", String.class);
                 if (outputGifAbsolutePath.equalsIgnoreCase("n")) {
                     System.out.println("Tidak akan membuat GIF");
@@ -215,15 +230,19 @@ public class ImageCompressor {
                 System.out.println("GIF sudah ada. Akan dilakukan overwrite");
             }
 
+            // Construct quadtree
             timeProfiler.startSection("Konstruksi Quadtree");
+            System.out.println("Mengonstruksi quadtree...");
             imageCompressor.compress();
             timeProfiler.stopSection();
 
             if (imageCompressor.isTargetPercentageEnabled()) {
+                // Binary refine + export image
                 System.out.println("Mencoba memenuhi target kompresi...");
                 timeProfiler.startSection("Binary Refine + Ekspor");
                 imageCompressor.binaryRefine();
             } else {
+                // Export image
                 System.out.println("Mengeskpor gambar...");
                 timeProfiler.startSection("Ekspor Gambar");
                 imageCompressor.exportImage();
@@ -231,11 +250,14 @@ public class ImageCompressor {
             timeProfiler.stopSection();
 
             if (outputGif != null) {
+                // Export GIF
                 timeProfiler.startSection("Ekspor GIF");
                 System.out.println("Mengekspor GIF...");
                 imageCompressor.exportGIF(outputGif);
                 timeProfiler.stopSection();
             }
+
+            // Display compression statistics
             System.out.println("Kompresi berhasil");
             System.out.println("");
             timeProfiler.print();

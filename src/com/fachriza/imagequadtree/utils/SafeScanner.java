@@ -4,11 +4,19 @@ import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class SafeScanner implements AutoCloseable {
+
     private Scanner scanner;
 
     public SafeScanner(Scanner scanner) {
         this.scanner = scanner;
         scanner.useDelimiter("\\s+");
+    }
+
+    @Override
+    public void close() {
+        if (scanner != null) {
+            scanner.close();
+        }
     }
 
     public <T> T getInput(String prompt, Class<T> type) {
@@ -65,11 +73,4 @@ public class SafeScanner implements AutoCloseable {
             }
         }
     }
-
-    public void close() {
-        if (scanner != null) {
-            scanner.close();
-        }
-    }
-
 }

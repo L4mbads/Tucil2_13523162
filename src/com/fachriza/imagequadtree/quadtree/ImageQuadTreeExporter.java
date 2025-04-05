@@ -26,11 +26,11 @@ public class ImageQuadTreeExporter {
             int targetDepth) {
 
         if (node.isLeafNode() || (iteration == targetDepth)) {
-            int imageWidth = imageData.getWidth();
-            int imageHeight = imageData.getHeight();
+            int imageWidth = imageData.width;
+            int imageHeight = imageData.height;
             int heightBound = y + height;
             int widthBound = x + width;
-            int packed = ImageUtil.pack24BitColors(node.getAverageColor());
+            int packed = ImageUtil.pack24BitColors(node.averageColor);
             for (int i = y; i <= heightBound && i < imageHeight; i++) {
                 for (int j = x; j <= widthBound && j < imageWidth; j++) {
                     buffer[i * imageWidth + j] = packed;
@@ -93,8 +93,8 @@ public class ImageQuadTreeExporter {
             ImageData imageData,
             int targetDepth) {
 
-        int width = imageData.getWidth();
-        int height = imageData.getHeight();
+        int width = imageData.width;
+        int height = imageData.height;
         int[] compressedImageBuffer = new int[width * height];
         fillImageBuffer(compressedImageBuffer, root, 0, 0, width, height, imageData, 1, targetDepth);
 
@@ -110,10 +110,10 @@ public class ImageQuadTreeExporter {
 
         ImageData imageData = builder.getImageData();
 
-        String format = imageData.getFormat();
+        String format = imageData.format;
 
-        int width = imageData.getWidth();
-        int height = imageData.getHeight();
+        int width = imageData.width;
+        int height = imageData.height;
 
         int[] buffer = getCompressedImageBuffer(iqt, imageData, 0);
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
@@ -131,8 +131,8 @@ public class ImageQuadTreeExporter {
 
         ImageData imageData = builder.getImageData();
 
-        int width = imageData.getWidth();
-        int height = imageData.getHeight();
+        int width = imageData.width;
+        int height = imageData.height;
 
         AnimatedGIFWriter writer = new AnimatedGIFWriter(false);
         OutputStream os = new FileOutputStream(outputFile);

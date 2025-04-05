@@ -16,7 +16,7 @@ public class MPDError extends ErrorMeasurementMethod {
             int width,
             int height) {
 
-        float[] minMaxDifference = getMinMaxDifference(mean, x, y, width, height);
+        float[] minMaxDifference = getMinMaxDifference(x, y, width, height);
         float avgDifference = (minMaxDifference[0] + minMaxDifference[1] + minMaxDifference[2]) / 3;
         return avgDifference;
     }
@@ -27,7 +27,6 @@ public class MPDError extends ErrorMeasurementMethod {
     }
 
     protected float[] getMinMaxDifference(
-            float[] mean,
             int x,
             int y,
             int width,
@@ -35,6 +34,7 @@ public class MPDError extends ErrorMeasurementMethod {
 
         float[] minVal = { Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE };
         float[] maxVal = { -Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE };
+
         for (int i = y; i < y + height; i++) {
             for (int j = x; j < x + width; j++) {
                 float red = (imageData.getRed(j, i) & 0xff);

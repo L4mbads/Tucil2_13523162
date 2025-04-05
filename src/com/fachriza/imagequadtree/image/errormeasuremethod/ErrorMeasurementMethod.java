@@ -3,6 +3,7 @@ package com.fachriza.imagequadtree.image.errormeasuremethod;
 import com.fachriza.imagequadtree.image.ImageData;
 
 public abstract class ErrorMeasurementMethod {
+
     protected ImageData imageData;
 
     public ErrorMeasurementMethod(ImageData imageData) {

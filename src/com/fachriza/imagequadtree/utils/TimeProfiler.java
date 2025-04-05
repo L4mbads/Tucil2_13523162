@@ -6,6 +6,7 @@ import java.util.Deque;
 public class TimeProfiler {
 
     private class Section {
+
         private String title;
         private float time;
         private long tempTime;
@@ -35,22 +36,28 @@ public class TimeProfiler {
     }
 
     public void print() {
+        // Find lengthiest title
         int maxLength = 0;
         for (Section section : sections) {
             int length = section.title.length();
             maxLength = length > maxLength ? length : maxLength;
         }
 
+        // Add some padding
         maxLength += 2;
 
+        // Print column title
         System.out.format("%" + (maxLength / 2 + 3) + "s", "Proses");
         System.out.format("%" + (8 + maxLength / 2) + "s%n", "Waktu");
+
         float totalTime = 0.0f;
         for (Section section : sections) {
             System.out.format("%-" + maxLength + "s : ", section.title);
             System.out.format("%10.2fms%n", section.time);
             totalTime += section.time;
         }
+
+        // Print total exectution time
         System.out.format("%-" + maxLength + "s : ", "Total Waktu");
         System.out.format("%10.2fms%n", totalTime);
     }

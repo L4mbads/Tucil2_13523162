@@ -4,13 +4,14 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 
 public class ImageData {
+
     private byte[] redBuffer;
     private byte[] greenBuffer;
     private byte[] blueBuffer;
 
-    private int width;
-    private int height;
-    private String format;
+    public final int width;
+    public final int height;
+    public final String format;
 
     public ImageData(BufferedImage image, String format) {
         this.width = image.getWidth();
@@ -56,18 +57,6 @@ public class ImageData {
             redBuffer[i] = pixelData[valueIndex + 2];
         }
 
-    }
-
-    public String getFormat() {
-        return format;
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public int getHeight() {
-        return height;
     }
 
     public int getBufferIndex(int x, int y) {
