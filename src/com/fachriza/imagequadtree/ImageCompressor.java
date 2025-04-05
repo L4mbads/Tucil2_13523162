@@ -160,8 +160,7 @@ public class ImageCompressor {
     /* ============================================ */
     public static void main(String[] args) {
         try (SafeScanner safeScanner = new SafeScanner(new Scanner(System.in))) {
-            TimeProfiler timeProfiler = new TimeProfiler("Image loading", "Tree construction",
-                    "Tree adjustment + output", "GIF output");
+            TimeProfiler timeProfiler = new TimeProfiler();
 
             String fileAbsolutePath = null;
             File inputFile = null;
@@ -170,9 +169,10 @@ public class ImageCompressor {
                 inputFile = new File(fileAbsolutePath);
             }
 
-            timeProfiler.startNext();
+            timeProfiler.startSection("Memuat Gambar");
+            System.out.println("Memuat Gambar...");
             ImageCompressor imageCompressor = new ImageCompressor(inputFile);
-            timeProfiler.stop();
+            timeProfiler.stopSection();
 
             System.out.println("1. Variance");
             System.out.println("2. Mean Absolute Difference");
@@ -226,26 +226,31 @@ public class ImageCompressor {
                 System.out.println("File already exists. Will overwrite later");
             }
 
-            timeProfiler.startNext();
+            timeProfiler.startSection("Konstruksi Quadtree");
             imageCompressor.compress();
-            timeProfiler.stop();
+            timeProfiler.stopSection();
 
-            timeProfiler.startNext();
             if (imageCompressor.isTargetPercentageEnabled()) {
+                System.out.println("Mencoba memenuhi target kompresi...");
+                timeProfiler.startSection("Binary Refine + Ekspor");
                 imageCompressor.binaryRefine();
             } else {
+                System.out.println("Mengeskpor gambar...");
+                timeProfiler.startSection("Ekspor Gambar");
                 imageCompressor.exportImage();
             }
-            timeProfiler.stop();
+            timeProfiler.stopSection();
 
-            timeProfiler.startNext();
             if (outputGif != null) {
-                System.out.println("Outputting gif");
+                timeProfiler.startSection("Ekspor GIF");
+                System.out.println("Mengekspor GIF...");
                 imageCompressor.exportGIF(outputGif);
+                timeProfiler.stopSection();
             }
-            timeProfiler.stop();
-
+            System.out.println("Kompresi berhasil");
+            System.out.println("");
             timeProfiler.print();
+            System.out.println("");
             System.out.format("Sebelum         : %.2fKB%n", (float) inputFile.length() / 1024.0f);
             System.out.format("Sesudah         : %.2fKB%n", (float) outputFile.length() / 1024.0f);
             System.out.format("Rasio Kompresi  : %.5f%%%n", imageCompressor.getCompressRatio() * 100.0f);

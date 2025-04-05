@@ -4,40 +4,54 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 
 public class TimeProfiler {
-    private float[] times;
-    private long tempTime;
-    private int currSection;
-    private String[] titles;
 
-    public TimeProfiler(String... string) {
-        titles = string;
-        times = new float[titles.length];
-        currSection = 0;
+    private class Section {
+        private String title;
+        private float time;
+        private long tempTime;
+
+        public Section(String title) {
+            this.title = title;
+            tempTime = System.nanoTime();
+        }
+
+        public void stop() {
+            time = (System.nanoTime() - tempTime) * 1e-6f;
+        }
     }
 
-    public void startNext() {
-        tempTime = System.nanoTime();
+    private Deque<Section> sections;
+
+    public TimeProfiler() {
+        sections = new ArrayDeque<Section>();
     }
 
-    public void stop() {
-        times[currSection] = (System.nanoTime() - tempTime) * 1e-6f;
-        currSection++;
+    public void startSection(String sectionTitle) {
+        sections.offerLast(new Section(sectionTitle));
+    }
+
+    public void stopSection() {
+        sections.peekLast().stop();
     }
 
     public void print() {
-        Deque<Integer> length = new ArrayDeque<Integer>();
-        for (final String title : titles) {
-            int l = title.length() + 2;
-            length.offer(l);
-            System.out.format("%-" + String.valueOf(l) + "s", title);
+        int maxLength = 0;
+        for (Section section : sections) {
+            int length = section.title.length();
+            maxLength = length > maxLength ? length : maxLength;
         }
-        System.out.format("%-15s", "Total");
-        System.out.println();
-        float totalTime = 0;
-        for (final float time : times) {
-            totalTime += time;
-            System.out.format("%-" + String.valueOf(length.removeFirst()) + ".2f", time);
+
+        maxLength += 2;
+
+        System.out.format("%" + (maxLength / 2 + 3) + "s", "Proses");
+        System.out.format("%" + (8 + maxLength / 2) + "s%n", "Waktu");
+        float totalTime = 0.0f;
+        for (Section section : sections) {
+            System.out.format("%-" + maxLength + "s : ", section.title);
+            System.out.format("%10.2fms%n", section.time);
+            totalTime += section.time;
         }
-        System.out.format("%.2fms%n", totalTime);
+        System.out.format("%-" + maxLength + "s : ", "Total Waktu");
+        System.out.format("%10.2fms%n", totalTime);
     }
 }
