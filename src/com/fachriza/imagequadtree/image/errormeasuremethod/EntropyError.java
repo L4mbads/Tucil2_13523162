@@ -1,8 +1,5 @@
 package com.fachriza.imagequadtree.image.errormeasuremethod;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.fachriza.imagequadtree.image.ImageData;
 
 public class EntropyError extends ErrorMeasurementMethod {
@@ -35,9 +32,9 @@ public class EntropyError extends ErrorMeasurementMethod {
             int width,
             int height) {
 
-        Map<Byte, Integer> mapR = new HashMap<Byte, Integer>();
-        Map<Byte, Integer> mapG = new HashMap<Byte, Integer>();
-        Map<Byte, Integer> mapB = new HashMap<Byte, Integer>();
+        int[] redFrequency = new int[256];
+        int[] greenFrequency = new int[256];
+        int[] blueFrequency = new int[256];
         float[] entropy = { 0, 0, 0 };
 
         int count = width * height;
@@ -46,21 +43,27 @@ public class EntropyError extends ErrorMeasurementMethod {
                 byte red = imageData.getRed(j, i);
                 byte green = imageData.getGreen(j, i);
                 byte blue = imageData.getBlue(j, i);
-                mapR.put(red, mapR.getOrDefault(red, 0) + 1);
-                mapG.put(green, mapG.getOrDefault(green, 0) + 1);
-                mapB.put(blue, mapB.getOrDefault(blue, 0) + 1);
+                redFrequency[red & 0xff]++;
+                greenFrequency[green & 0xff]++;
+                blueFrequency[blue & 0xff]++;
             }
         }
 
-        for (int i = y; i < y + height; i++) {
-            for (int j = x; j < x + width; j++) {
-                float red = (float) mapR.get(imageData.getRed(j, i)) / count;
-                float green = (float) mapG.get(imageData.getGreen(j, i)) / count;
-                float blue = (float) mapB.get(imageData.getBlue(j, i)) / count;
-
-                entropy[0] += (red * log2(red));
-                entropy[1] += (green * log2(green));
-                entropy[2] += (blue * log2(blue));
+        for (int i = 0; i < 255; i++) {
+            int red = redFrequency[i];
+            if (red > 0) {
+                float pRed = ((float) red / count);
+                entropy[0] += (pRed * log2(pRed));
+            }
+            int green = greenFrequency[i];
+            if (green > 0) {
+                float pGreen = ((float) green / count);
+                entropy[1] += (pGreen * log2(pGreen));
+            }
+            int blue = blueFrequency[i];
+            if (blue > 0) {
+                float pBlue = ((float) blue / count);
+                entropy[2] += (pBlue * log2(pBlue));
             }
         }
 
@@ -72,7 +75,9 @@ public class EntropyError extends ErrorMeasurementMethod {
     }
 
     private float log2(float x) {
-        return (float) (Math.log(x) / Math.log(2));
+        // Approximation using the rule:
+        // Log2(x) = Ln(x) / Ln(2)
+        return (float) (Math.log(x) / 0.69314718056f);
 
     }
 
