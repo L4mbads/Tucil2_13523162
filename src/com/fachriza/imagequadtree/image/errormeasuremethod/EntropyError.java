@@ -79,10 +79,11 @@ public class EntropyError extends ErrorMeasurementMethod {
     }
 
     private float log2(float x) {
-        // Approximation using the rule:
-        // Log2(x) = Ln(x) / Ln(2)
+        /*
+         * Calculate using the rule:
+         * Log2(x) = Ln(x) / Ln(2)
+         */
         return (float) (Math.log(x) / 0.69314718056f);
-
     }
 
 }

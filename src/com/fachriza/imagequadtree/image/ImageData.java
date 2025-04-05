@@ -18,20 +18,18 @@ public class ImageData {
         this.height = image.getHeight();
         this.format = format;
 
+        // Get color array
         // int[] packedBuffer = new int[width * height];
         // img.getRGB(0, 0, width, height, packedBuffer, 0, width); // Convert to array
 
-        // i think this is faster
+        // I think this is faster
         // BufferedImage image = new BufferedImage(width, height,
         // BufferedImage.TYPE_INT_RGB);
-
         // Graphics2D g = image.createGraphics();
         // g.drawImage(img, 0, 0, null);
         // g.dispose();
-
         // int[] packedBuffer = ((DataBufferInt)
         // image.getRaster().getDataBuffer()).getData();
-
         // for (int i = 0; i < packedBuffer.length; i++) {
         // int rgb = packedBuffer[i];
         // redBuffer[i] = (byte) ((rgb >> 16) & 0xFF);
@@ -39,7 +37,7 @@ public class ImageData {
         // blueBuffer[i] = (byte) (rgb & 0xFF);
         // }
 
-        // no this is faster
+        // No this is faster. Wtf was that code
         int size = width * height;
 
         redBuffer = new byte[size];
@@ -56,7 +54,6 @@ public class ImageData {
             greenBuffer[i] = pixelData[valueIndex + 1];
             redBuffer[i] = pixelData[valueIndex + 2];
         }
-
     }
 
     public int getBufferIndex(int x, int y) {

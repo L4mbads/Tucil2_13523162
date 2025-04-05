@@ -47,27 +47,44 @@ public class ImageQuadTreeBuilder {
     public ImageQuadTree build(int x, int y, int width, int height) {
         nodeCount++;
 
+        /*
+         * Always calculate the mean, even if its not a leaf node.
+         * We need the mean for error calculation and GIF anyway.
+         */
         float[] mean = ImageUtil.getAverageColor(imageData, x, y, width, height);
         ImageQuadTree node = new ImageQuadTree((byte) mean[0], (byte) mean[1], (byte) mean[2]);
 
         int size = width * height;
-        if (size == 1 || size <= minimumBlockSize)
+        if (size <= minimumBlockSize)
             return node;
 
         float error = emm.getErrorValue(mean, x, y, width, height);
 
+        /*
+         * Calculate children regions.
+         *
+         * "Why don't you make a Region class for better encapsulation?", you ask?
+         * I don't want Java class overhead, i want performance
+         *
+         * "Then why do you use Java?",
+         * Good question.
+         */
         int halfLowerWidth = width / 2;
         int halfLowerHeight = height / 2;
         int halfUpperWidth = width - halfLowerWidth;
         int halfUpperHeight = height - halfLowerHeight;
         int halfUpperSize = halfUpperHeight * halfUpperWidth;
 
+        /*
+         * Check if future children size are big enough to split.
+         * No need to check halfLowerSize.
+         */
         if (error > threshold && halfUpperSize >= minimumBlockSize) {
 
             ImageQuadTree n1, n2, n3, n4;
             if (halfUpperSize > 100000) {
 
-                // do 2 tasks in other thread if blocks are big enough
+                // do 2 build tasks in other thread if blocks are big enough
                 BuildQuadTreeAsync task3 = new BuildQuadTreeAsync(
                         x,
                         y + halfLowerHeight,
@@ -84,6 +101,7 @@ public class ImageQuadTreeBuilder {
                 task3.fork();
                 task4.fork();
 
+                // do 2 build task in current working thread
                 n1 = build(
                         x,
                         y,
@@ -99,7 +117,7 @@ public class ImageQuadTreeBuilder {
                 n3 = task3.join();
                 n4 = task4.join();
             } else {
-                // else build all in current thread
+                // else do all build task in current working thread
                 n1 = build(
                         x,
                         y,
@@ -158,4 +176,5 @@ public class ImageQuadTreeBuilder {
             return build(x, y, width, height);
         }
     }
+
 }

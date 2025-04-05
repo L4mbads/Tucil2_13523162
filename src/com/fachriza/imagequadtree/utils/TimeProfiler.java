@@ -53,12 +53,13 @@ public class TimeProfiler {
         float totalTime = 0.0f;
         for (Section section : sections) {
             System.out.format("%-" + maxLength + "s : ", section.title);
-            System.out.format("%10.2fms%n", section.time);
+            System.out.format("%11.2f ms%n", section.time);
             totalTime += section.time;
         }
 
         // Print total exectution time
         System.out.format("%-" + maxLength + "s : ", "Total Waktu");
-        System.out.format("%10.2fms%n", totalTime);
+        System.out.format("%11.2f ms%n", totalTime);
     }
+
 }

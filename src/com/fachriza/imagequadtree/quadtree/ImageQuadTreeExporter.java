@@ -10,6 +10,7 @@ import javax.imageio.ImageIO;
 
 import com.fachriza.imagequadtree.image.ImageData;
 import com.fachriza.imagequadtree.utils.ImageUtil;
+
 import com.github.dragon66.AnimatedGIFWriter;
 
 public class ImageQuadTreeExporter {
@@ -146,6 +147,8 @@ public class ImageQuadTreeExporter {
             image.setRGB(0, 0, width, height, buffer, 0, width);
             writer.writeFrame(os, image, 1000);
         }
+
         writer.finishWrite(os);
     }
+
 }

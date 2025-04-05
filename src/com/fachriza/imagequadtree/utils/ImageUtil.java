@@ -7,7 +7,7 @@ import com.fachriza.imagequadtree.image.ImageData;
 
 public class ImageUtil {
 
-    // in REC. 601-7 / BT.601-7 colorspace
+    // Constants in REC. 601-7 / BT.601-7 colorspace
     public static final float[] SRGB_LUMINANCE_CONSTANTS = { 0.299f, 0.587f, 0.114f };
 
     public static int pack24BitColors(byte[] colors) {
@@ -45,6 +45,8 @@ public class ImageUtil {
             return "jpeg";
         if (fileName.endsWith(".png"))
             return "png";
+        if (fileName.endsWith(".gif"))
+            return "gif";
         return null;
     }
 

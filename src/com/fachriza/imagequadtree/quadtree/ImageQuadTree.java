@@ -46,4 +46,5 @@ public class ImageQuadTree {
         }
         return 1;
     }
+
 }

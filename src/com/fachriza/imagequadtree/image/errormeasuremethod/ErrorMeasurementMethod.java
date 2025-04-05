@@ -18,4 +18,5 @@ public abstract class ErrorMeasurementMethod {
             int height);
 
     public abstract float getMaxErrorValue();
+
 }

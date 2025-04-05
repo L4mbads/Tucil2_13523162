@@ -16,7 +16,7 @@ public class SSIMError extends VarianceError {
             int y,
             int width,
             int height) {
-        /**
+        /*
          * C2 = ((K2)(L))^2
          *
          * where:

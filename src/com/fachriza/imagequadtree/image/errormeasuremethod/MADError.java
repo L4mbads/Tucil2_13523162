@@ -50,4 +50,5 @@ public class MADError extends ErrorMeasurementMethod {
 
         return absoluteDifference;
     }
+
 }

@@ -52,4 +52,5 @@ public class VarianceError extends ErrorMeasurementMethod {
 
         return variance;
     }
+
 }
