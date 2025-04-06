@@ -311,12 +311,12 @@ public class ImageCompressor {
             System.out.format("Jumlah Simpul   : %d%n", imageCompressor.getNodeCount());
             System.out.println("");
             System.out.format("Alamat Gambar   : %s%n", inputImageAbsolutePath);
-            if (imageCompressor.isTargetPercentageEnabled())
+            if (outputGifFile != null)
                 System.out.format("Alamat GIF      : %s%n", outputGifAbsolutePath);
 
         } catch (Exception e) {
-            System.out.println("Error:");
-            System.out.println(e.getLocalizedMessage());
+            System.out.println("Terjadi error. Cek log/crash.log untuk melihat log");
+            CrashLogger.logException(e);
         }
     }
 
