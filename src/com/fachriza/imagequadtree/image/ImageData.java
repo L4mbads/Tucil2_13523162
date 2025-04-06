@@ -49,7 +49,7 @@ public class ImageData {
         int numberOfValues = hasAlphaChannel ? 4 : 3;
         int valueIndex = hasAlphaChannel ? 1 : 0;
 
-        for (int i = 0; valueIndex + numberOfValues - 1 < pixelData.length; valueIndex += numberOfValues, i++) {
+        for (int i = 0; valueIndex + 2 < pixelData.length; valueIndex += numberOfValues, i++) {
             blueBuffer[i] = pixelData[valueIndex];
             greenBuffer[i] = pixelData[valueIndex + 1];
             redBuffer[i] = pixelData[valueIndex + 2];
