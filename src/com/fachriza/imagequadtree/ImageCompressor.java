@@ -102,7 +102,7 @@ public class ImageCompressor {
         return root;
     }
 
-    private void reconstruct() throws IOException {
+    private boolean rebuild() throws IOException {
 
         exportImage();
 
@@ -114,8 +114,10 @@ public class ImageCompressor {
         float sizeDelta = getCompressRatio() - compressionLevel;
         float thresholdDelta = upperBound - lowerBound;
 
+        final float RATIO_LENIENCE = 0.01f; // 1%
+
         byte iteration = 0;
-        while (iteration < 100 && Math.abs(sizeDelta) > 0.01f && thresholdDelta > 0.1f) {
+        while (iteration < 100 && Math.abs(sizeDelta) > RATIO_LENIENCE && thresholdDelta > 0.1f) {
             iteration++;
             if (sizeDelta < 0.0) {
                 lowerBound = threshold;
@@ -128,9 +130,6 @@ public class ImageCompressor {
             builder.setThreshold(threshold);
             builder.resetNodeCount();
 
-            // builder.adjust(root, 0, 0, imageData.getWidth(), imageData.getHeight());
-
-            // why is this faster what
             root = builder.build(0, 0, width, height);
 
             exportImage();
@@ -138,6 +137,7 @@ public class ImageCompressor {
             sizeDelta = getCompressRatio() - compressionLevel;
             thresholdDelta = upperBound - lowerBound;
         }
+        return (Math.abs(sizeDelta) <= RATIO_LENIENCE);
     }
 
     public void exportImage() throws IOException {
@@ -266,19 +266,20 @@ public class ImageCompressor {
             }
 
             // Construct quadtree
-            System.out.println("Mengonstruksi quadtree...");
-            timeProfiler.startSection("Konstruksi Quadtree");
+            System.out.println("Membangun quadtree...");
+            timeProfiler.startSection("Build Quadtree");
 
             imageCompressor.compress();
 
             timeProfiler.stopSection();
 
+            boolean targetReached = true;
             if (imageCompressor.isTargetPercentageEnabled()) {
-                // Quadtree reconstruction + export image
+                // Quadtree rebuild + export image
                 System.out.println("Mencoba memenuhi target kompresi...");
-                timeProfiler.startSection("Rekonstruksi + Ekspor");
+                timeProfiler.startSection("Rebuild + Ekspor");
 
-                imageCompressor.reconstruct();
+                targetReached = imageCompressor.rebuild();
             } else {
                 // Export image
                 System.out.println("Mengeskpor gambar...");
@@ -288,6 +289,9 @@ public class ImageCompressor {
             }
 
             timeProfiler.stopSection();
+            if (!targetReached) {
+                System.out.println("Tidak mampu mencapai target kompresi");
+            }
 
             if (outputGifFile != null) {
                 // Export GIF
@@ -306,7 +310,13 @@ public class ImageCompressor {
             System.out.println("");
             System.out.format("Sebelum         : %.2f KB%n", (float) inputImageFile.length() / 1024.0f);
             System.out.format("Sesudah         : %.2f KB%n", (float) outputImageFile.length() / 1024.0f);
-            System.out.format("Rasio Kompresi  : %.2f%%%n", imageCompressor.getCompressRatio() * 100.0f);
+            System.out.format("Rasio Kompresi  : %.2f%%", imageCompressor.getCompressRatio() * 100.0f);
+            if (imageCompressor.isTargetPercentageEnabled() && !targetReached) {
+                System.out.println(
+                        " (Target tidak bisa dicapai karena iterasi terlalu banyak atau tidak memungkinkan)");
+            } else {
+                System.out.println("");
+            }
             System.out.format("Kedalaman Pohon : %d%n", imageCompressor.getCompressedTree().getDepth());
             System.out.format("Jumlah Simpul   : %d%n", imageCompressor.getNodeCount());
             System.out.println("");
