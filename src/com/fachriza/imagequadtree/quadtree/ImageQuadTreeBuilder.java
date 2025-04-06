@@ -1,6 +1,7 @@
 package com.fachriza.imagequadtree.quadtree;
 
 import java.util.concurrent.RecursiveTask;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.fachriza.imagequadtree.image.ImageData;
 import com.fachriza.imagequadtree.image.errormeasuremethod.ErrorMeasurementMethod;
@@ -12,8 +13,8 @@ public class ImageQuadTreeBuilder {
     private ImageData imageData;
     private float threshold;
     private int minimumBlockSize;
-
-    private int nodeCount;
+    // Use atomic to prevent race condition
+    private final AtomicInteger nodeCount;
 
     public ImageQuadTreeBuilder(
             ErrorMeasurementMethod emm,
@@ -25,7 +26,7 @@ public class ImageQuadTreeBuilder {
         this.imageData = imageData;
         this.threshold = threshold;
         this.minimumBlockSize = minimumBlockSize;
-        this.nodeCount = 0;
+        this.nodeCount = new AtomicInteger(0);
     }
 
     public ImageData getImageData() {
@@ -33,11 +34,11 @@ public class ImageQuadTreeBuilder {
     }
 
     public int getNodeCount() {
-        return nodeCount;
+        return nodeCount.get();
     }
 
     public void resetNodeCount() {
-        this.nodeCount = 0;
+        this.nodeCount.set(0);
     }
 
     public void setThreshold(float threshold) {
@@ -45,7 +46,7 @@ public class ImageQuadTreeBuilder {
     }
 
     public ImageQuadTree build(int x, int y, int width, int height) {
-        nodeCount++;
+        nodeCount.incrementAndGet();
 
         /*
          * Always calculate the mean, even if its not a leaf node.
