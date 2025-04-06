@@ -18,75 +18,33 @@ public class ImageQuadTreeExporter {
     private static void fillImageBuffer(
             int[] buffer,
             ImageQuadTree node,
-            int x,
-            int y,
-            int width,
-            int height,
             ImageData imageData,
             int iteration,
             int targetDepth) {
 
-        if (node.isLeafNode() || (iteration == targetDepth)) {
+        boolean isTargetIteration = iteration == targetDepth;
+
+        if (node.isLeafNode() || isTargetIteration) {
             int imageWidth = imageData.width;
             int imageHeight = imageData.height;
-            int heightBound = y + height;
-            int widthBound = x + width;
+            int heightBound = node.y + node.height;
+            int widthBound = node.x + node.width;
+
             int packed = ImageUtil.pack24BitColors(node.averageColor);
-            for (int i = y; i <= heightBound && i < imageHeight; i++) {
-                for (int j = x; j <= widthBound && j < imageWidth; j++) {
+
+            for (int i = node.y; i <= heightBound && i < imageHeight; i++) {
+                for (int j = node.x; j <= widthBound && j < imageWidth; j++) {
                     buffer[i * imageWidth + j] = packed;
                 }
             }
             return;
         }
 
-        int halfLowerWidth = width / 2;
-        int halfLowerHeight = height / 2;
-        int halfUpperWidth = width - halfLowerWidth;
-        int halfUpperHeight = height - halfLowerHeight;
-
         int nextIteration = ++iteration;
-        fillImageBuffer(
-                buffer,
-                node.getChildren(0),
-                x,
-                y,
-                halfLowerWidth,
-                halfLowerHeight,
-                imageData,
-                nextIteration,
-                targetDepth);
-        fillImageBuffer(
-                buffer,
-                node.getChildren(1),
-                x + halfLowerWidth,
-                y,
-                halfUpperWidth,
-                halfLowerHeight,
-                imageData,
-                nextIteration,
-                targetDepth);
-        fillImageBuffer(
-                buffer,
-                node.getChildren(2),
-                x,
-                y + halfLowerHeight,
-                halfLowerWidth,
-                halfUpperHeight,
-                imageData,
-                nextIteration,
-                targetDepth);
-        fillImageBuffer(
-                buffer,
-                node.getChildren(3),
-                x + halfLowerWidth,
-                y + halfLowerHeight,
-                halfUpperWidth,
-                halfUpperHeight,
-                imageData,
-                nextIteration,
-                targetDepth);
-
+        for (ImageQuadTree child : node.getChildrenArray()) {
+            fillImageBuffer(buffer, child, imageData,
+                    nextIteration, targetDepth);
+        }
     }
 
     public static int[] getCompressedImageBuffer(
@@ -94,10 +52,8 @@ public class ImageQuadTreeExporter {
             ImageData imageData,
             int targetDepth) {
 
-        int width = imageData.width;
-        int height = imageData.height;
-        int[] compressedImageBuffer = new int[width * height];
-        fillImageBuffer(compressedImageBuffer, root, 0, 0, width, height, imageData, 1, targetDepth);
+        int[] compressedImageBuffer = new int[imageData.width * imageData.height];
+        fillImageBuffer(compressedImageBuffer, root, imageData, 1, targetDepth);
 
         return compressedImageBuffer;
 
@@ -140,10 +96,9 @@ public class ImageQuadTreeExporter {
         writer.prepareForWrite(os, -1, -1);
 
         int depth = iqt.getDepth();
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         for (int i = 1; i <= depth; i++) {
             int[] buffer = getCompressedImageBuffer(iqt, imageData, i);
-            BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-
             image.setRGB(0, 0, width, height, buffer, 0, width);
             writer.writeFrame(os, image, 1000);
         }

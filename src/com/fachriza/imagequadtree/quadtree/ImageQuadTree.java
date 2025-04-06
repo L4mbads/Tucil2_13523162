@@ -3,10 +3,22 @@ package com.fachriza.imagequadtree.quadtree;
 public class ImageQuadTree {
 
     public final byte[] averageColor;
+    public final int x;
+    public final int y;
+    public final int width;
+    public final int height;
     private ImageQuadTree[] children;
 
-    public ImageQuadTree(byte red, byte green, byte blue) {
-        this.averageColor = new byte[] { red, green, blue };
+    public ImageQuadTree(float[] averageColor, int x, int y, int width, int height) {
+        this.averageColor = new byte[] {
+                (byte) averageColor[0],
+                (byte) averageColor[1],
+                (byte) averageColor[2]
+        };
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
         this.children = null;
     }
 
@@ -16,19 +28,6 @@ public class ImageQuadTree {
 
     public void setChildrenArray(ImageQuadTree[] children) {
         this.children = children;
-    }
-
-    public ImageQuadTree getChildren(int idx) {
-        if (children == null)
-            return null;
-        return children[idx];
-    }
-
-    public void setChildren(int idx, ImageQuadTree child) {
-        if (children == null) {
-            children = new ImageQuadTree[4];
-        }
-        children[idx] = child;
     }
 
     public boolean isLeafNode() {

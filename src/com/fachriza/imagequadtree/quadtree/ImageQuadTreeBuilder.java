@@ -52,7 +52,7 @@ public class ImageQuadTreeBuilder {
          * We need the mean for error calculation and GIF anyway.
          */
         float[] mean = ImageUtil.getAverageColor(imageData, x, y, width, height);
-        ImageQuadTree node = new ImageQuadTree((byte) mean[0], (byte) mean[1], (byte) mean[2]);
+        ImageQuadTree node = new ImageQuadTree(mean, x, y, width, height);
 
         int size = width * height;
         if (size <= minimumBlockSize)
