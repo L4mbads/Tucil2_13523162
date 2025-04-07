@@ -81,7 +81,6 @@ public class ImageQuadTreeBuilder {
          * No need to check halfLowerSize.
          */
         if (error > threshold && halfUpperSize >= minimumBlockSize) {
-
             ImageQuadTree n1, n2, n3, n4;
             if (halfUpperSize > 100000) {
 
@@ -103,59 +102,28 @@ public class ImageQuadTreeBuilder {
                 task4.fork();
 
                 // do 2 build task in current working thread
-                n1 = build(
-                        x,
-                        y,
-                        halfLowerWidth,
-                        halfLowerHeight);
+                n1 = build(x, y, halfLowerWidth, halfLowerHeight);
 
-                n2 = build(
-                        x + halfLowerWidth,
-                        y,
-                        halfUpperWidth,
-                        halfLowerHeight);
+                n2 = build(x + halfLowerWidth, y, halfUpperWidth, halfLowerHeight);
 
                 n3 = task3.join();
                 n4 = task4.join();
             } else {
                 // else do all build task in current working thread
-                n1 = build(
-                        x,
-                        y,
-                        halfLowerWidth,
-                        halfLowerHeight);
+                n1 = build(x, y, halfLowerWidth, halfLowerHeight);
 
-                n2 = build(
-                        x + halfLowerWidth,
-                        y,
-                        halfUpperWidth,
-                        halfLowerHeight);
+                n2 = build(x + halfLowerWidth, y, halfUpperWidth, halfLowerHeight);
 
-                n3 = build(
-                        x,
-                        y + halfLowerHeight,
-                        halfLowerWidth,
-                        halfUpperHeight);
+                n3 = build(x, y + halfLowerHeight,
+                        halfLowerWidth, halfUpperHeight);
 
-                n4 = build(
-                        x + halfLowerWidth,
-                        y + halfLowerHeight,
-                        halfUpperWidth,
-                        halfUpperHeight);
-
+                n4 = build(x + halfLowerWidth, y + halfLowerHeight,
+                        halfUpperWidth, halfUpperHeight);
             }
-
-            ImageQuadTree[] children = {
-                    n1,
-                    n2,
-                    n3,
-                    n4
-            };
-
+            ImageQuadTree[] children = { n1, n2, n3, n4 };
             node.setChildrenArray(children);
         }
         return node;
-
     }
 
     private class BuildQuadTreeAsync extends RecursiveTask<ImageQuadTree> {
