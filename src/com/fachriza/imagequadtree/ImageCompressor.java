@@ -65,7 +65,7 @@ public class ImageCompressor {
     public ImageCompressor setCompressionLevel(float compressionLevel) {
         this.compressionLevel = compressionLevel;
         if (compressionLevel > 0.0f) {
-            threshold = compressionLevel * emm.getMaxErrorValue();
+            threshold = 0.5f * emm.getMaxErrorValue();
             minimumBlockSize = 1;
         }
         return this;
@@ -112,12 +112,12 @@ public class ImageCompressor {
         float upperBound = getMaxErrorValue();
         float lowerBound = 0.0f;
         float sizeDelta = getCompressRatio() - compressionLevel;
-        float thresholdDelta = upperBound - lowerBound;
 
         final float RATIO_LENIENCE = 0.01f; // 1%
 
         byte iteration = 0;
-        while (iteration < 100 && Math.abs(sizeDelta) > RATIO_LENIENCE && thresholdDelta > 0.1f) {
+        while (iteration < 100 && Math.abs(sizeDelta) > RATIO_LENIENCE && threshold != upperBound
+                && threshold != upperBound) {
             iteration++;
             if (sizeDelta < 0.0) {
                 lowerBound = threshold;
@@ -135,7 +135,6 @@ public class ImageCompressor {
             exportImage();
 
             sizeDelta = getCompressRatio() - compressionLevel;
-            thresholdDelta = upperBound - lowerBound;
         }
         return (Math.abs(sizeDelta) <= RATIO_LENIENCE);
     }
@@ -304,7 +303,7 @@ public class ImageCompressor {
             }
 
             // Display compression statistics
-            System.out.println("Kompresi berhasil");
+            System.out.println("Kompresi selesai");
             System.out.println("");
             timeProfiler.print();
             System.out.println("");
@@ -320,7 +319,7 @@ public class ImageCompressor {
             System.out.format("Kedalaman Pohon : %d%n", imageCompressor.getCompressedTree().getDepth());
             System.out.format("Jumlah Simpul   : %d%n", imageCompressor.getNodeCount());
             System.out.println("");
-            System.out.format("Alamat Gambar   : %s%n", inputImageAbsolutePath);
+            System.out.format("Alamat Gambar   : %s%n", outputImageAbsolutePath);
             if (outputGifFile != null)
                 System.out.format("Alamat GIF      : %s%n", outputGifAbsolutePath);
 
