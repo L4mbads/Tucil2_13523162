@@ -25,3 +25,6 @@ replay_pid*
 
 # exclude libraries
 !lib/*
+
+# exclude executable jar
+!bin/*.jar
